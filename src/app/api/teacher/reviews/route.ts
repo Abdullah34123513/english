@@ -18,20 +18,20 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Teacher ID is required" }, { status: 400 })
     }
 
-    // Fetch reviews for the teacher
-    const reviews = await db.booking.findMany({
+    // Fetch reviews directly for the teacher
+    const reviews = await db.review.findMany({
       where: {
-        teacherId: teacherId,
-        review: {
-          isNot: null
-        }
+        teacherId: teacherId
       },
       include: {
-        review: true,
         student: {
-          select: {
-            name: true,
-            image: true
+          include: {
+            user: {
+              select: {
+                name: true,
+                image: true
+              }
+            }
           }
         }
       },
@@ -40,14 +40,14 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    const formattedReviews = reviews.map(booking => ({
-      id: booking.review!.id,
-      rating: booking.review!.rating,
-      comment: booking.review!.comment,
-      createdAt: booking.review!.createdAt,
+    const formattedReviews = reviews.map(review => ({
+      id: review.id,
+      rating: review.rating,
+      comment: review.comment,
+      createdAt: review.createdAt,
       student: {
-        name: booking.student.name,
-        image: booking.student.image
+        name: review.student.user.name,
+        image: review.student.user.image
       }
     }))
 

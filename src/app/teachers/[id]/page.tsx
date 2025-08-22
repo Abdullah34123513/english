@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useState, use } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -53,10 +53,10 @@ interface Review {
   }
 }
 
-export default function TeacherProfilePage({ params }: { params: { id: string } }) {
+export default function TeacherProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const teacherId = params.id
+  const { id: teacherId } = use(params)
   const [teacher, setTeacher] = useState<Teacher | null>(null)
   const [reviews, setReviews] = useState<Review[]>([])
   const [loading, setLoading] = useState(true)
