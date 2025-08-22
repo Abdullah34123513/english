@@ -53,7 +53,6 @@ model User {
   // Relations
   studentProfile      Student?
   teacherProfile      Teacher?
-  reviews            Review[]  @relation("UserReviews")
   accounts           Account[]
   sessions           Session[]
   emailVerifications EmailVerification[]
@@ -249,7 +248,6 @@ model Review {
   student Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
   teacher Teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
   booking Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  user    User     @relation("UserReviews", fields: [studentId], references: [id], onDelete: Cascade)
 
   @@map("reviews")
 }
