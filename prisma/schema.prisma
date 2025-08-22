@@ -13,20 +13,221 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  REFUNDED
+  FAILED
+}
+
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
   name      String?
+  image     String?
+  password  String?
+  role      UserRole @default(STUDENT)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // Relations
+  studentProfile Student?
+  teacherProfile Teacher?
+  reviews        Review[]  @relation("UserReviews")
+  accounts       Account[]
+  sessions       Session[]
+  
+  @@map("users")
 }
 
-model Post {
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model Student {
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  age                 String?  // Age range
+  country             String?  // Country of residence
+  nativeLanguage      String?  // Native language
+  timezone            String?  // Timezone
+  currentLevel        String?  // Current English level
+  learningGoals       String?  // JSON array of learning goals
+  targetScore         String?  // Target exam score
+  preferredLearningStyle String? // JSON array of learning styles
+  studyFrequency      String?  // How often they want to study
+  sessionDuration     String?  // Preferred session duration
+  teacherPreferences  String?  // JSON array of teacher preferences
+  interests           String?  // JSON array of interests
+  hobbies             String?  // JSON array of hobbies
+  preferredDays       String?  // JSON array of preferred days
+  preferredTimes      String?  // JSON array of preferred times
+  previousExperience  String?  // Previous learning experience
+  specificNeeds       String?  // Specific learning needs
+  motivation          String?  // Motivation for learning
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  bookings Booking[]
+  reviews  Review[]
+  payments Payment[]
+
+  @@map("students")
+}
+
+model Teacher {
+  id                   String   @id @default(cuid())
+  userId               String   @unique
+  bio                  String?
+  hourlyRate           Float
+  experience           String?  // Experience level as string
+  education            String?
+  languages            String?  // JSON array of languages taught
+  specializations      String?  // JSON array of specializations
+  teachingStyle        String?  // Teaching methodology
+  preferredAgeGroups   String?  // JSON array of preferred age groups
+  certifications       String?  // JSON array of certifications
+  introductionVideo    String?  // URL to introduction video
+  trialLesson          Boolean  @default(true)
+  isActive             Boolean  @default(true)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  availability Availability[]
+  bookings     Booking[]
+  reviews      Review[]
+
+  @@map("teachers")
+}
+
+model Availability {
+  id          String   @id @default(cuid())
+  teacherId   String
+  dayOfWeek   Int      // 0-6 (Sunday-Saturday)
+  startTime   String   // HH:MM format
+  endTime     String   // HH:MM format
+  isAvailable Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  teacher Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@unique([teacherId, dayOfWeek, startTime])
+  @@map("availabilities")
+}
+
+model Booking {
+  id            String        @id @default(cuid())
+  studentId     String
+  teacherId     String
+  startTime     DateTime
+  endTime       DateTime
+  status        BookingStatus @default(PENDING)
+  paymentStatus PaymentStatus @default(PENDING)
+  meetLink      String?
+  notes         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  student Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  teacher Teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  review  Review?
+  payments Payment[]
+
+  @@map("bookings")
+}
+
+model Payment {
+  id            String   @id @default(cuid())
+  bookingId     String
+  studentId     String
+  transactionId String   // Unique transaction reference from bank
+  amount        Float    // Payment amount
+  paymentDate   DateTime // Date of payment
+  bankName      String   // Bank name where payment was made
+  accountNumber String?  // Student's account number
+  receiptImage  String?  // URL to receipt image
+  notes         String?  // Additional notes
+  status        String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  approvedBy    String?  // Admin user ID who approved
+  approvedAt    DateTime? // When payment was approved
+  rejectionReason String? // Reason for rejection if any
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([bookingId])
+  @@map("payments")
+}
+
+model Review {
   id        String   @id @default(cuid())
-  title     String
-  content   String?
-  published Boolean  @default(false)
-  authorId  String
+  studentId String
+  teacherId String
+  bookingId String   @unique
+  rating    Int      // 1-5 stars
+  comment   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  student Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  teacher Teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  booking Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  user    User     @relation("UserReviews", fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@map("reviews")
 }

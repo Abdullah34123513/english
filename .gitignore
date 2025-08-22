@@ -47,3 +47,11 @@ test
 prompt
 
 server.log
+
+# database files
+prisma/dev.db
+prisma/*.db
+
+# seed scripts
+prisma/seed.js
+prisma/simple-seed.js

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
+import { Providers } from "@/components/providers/session-provider";
+import { Navigation } from "@/components/layout/navigation";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,21 +16,21 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Z.ai Code Scaffold - AI-Powered Development",
-  description: "Modern Next.js scaffold optimized for AI-powered development with Z.ai. Built with TypeScript, Tailwind CSS, and shadcn/ui.",
-  keywords: ["Z.ai", "Next.js", "TypeScript", "Tailwind CSS", "shadcn/ui", "AI development", "React"],
-  authors: [{ name: "Z.ai Team" }],
+  title: "English Learning Platform - Connect with Expert Teachers",
+  description: "Learn English with certified teachers through 1-on-1 online classes. Book flexible sessions and improve your language skills with personalized instruction.",
+  keywords: ["English learning", "online classes", "language learning", "1-on-1 tutoring", "English teachers"],
+  authors: [{ name: "English Learning Platform" }],
   openGraph: {
-    title: "Z.ai Code Scaffold",
-    description: "AI-powered development with modern React stack",
-    url: "https://chat.z.ai",
-    siteName: "Z.ai",
+    title: "English Learning Platform",
+    description: "Connect with expert English teachers for personalized 1-on-1 online classes",
+    url: "https://english-learning-platform.com",
+    siteName: "English Learning Platform",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Z.ai Code Scaffold",
-    description: "AI-powered development with modern React stack",
+    title: "English Learning Platform",
+    description: "Connect with expert English teachers for personalized 1-on-1 online classes",
   },
 };
 
@@ -42,8 +44,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >
-        {children}
-        <Toaster />
+        <Providers>
+          <Navigation />
+          {children}
+          <Toaster />
+        </Providers>
       </body>
     </html>
   );
