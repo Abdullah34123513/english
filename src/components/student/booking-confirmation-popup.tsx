@@ -487,7 +487,7 @@ export function BookingConfirmationPopup({
   return (
     <TooltipProvider>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-4xl lg:max-w-6xl max-h-[90vh] sm:max-h-[95vh] overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50">
+        <DialogContent className="max-w-4xl lg:max-w-6xl max-h-[90vh] sm:max-h-[95vh] bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 flex flex-col">
           {/* Animation Overlay */}
           {animationState.isAnimating && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -620,10 +620,10 @@ export function BookingConfirmationPopup({
             </div>
           </DialogHeader>
 
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:gap-6 h-[calc(90vh-180px)] sm:h-[calc(95vh-200px)] overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:gap-6 flex-1 overflow-hidden">
           {/* Enhanced Booking Summary */}
           <div className="lg:col-span-2">
-            <Card className="h-full border-0 bg-white/80 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300">
+            <Card className="h-full border-0 bg-white/80 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 flex flex-col">
               <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-xl">
                 <CardTitle className="flex items-center justify-between">
                   <span className="flex items-center space-x-2">
@@ -646,7 +646,7 @@ export function BookingConfirmationPopup({
                   Review your booking details before payment
                 </CardDescription>
               </CardHeader>
-              <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+              <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6 flex-1 overflow-y-auto">
                 {/* Teacher Info */}
                 <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-3 sm:p-4 rounded-xl hover:shadow-md transition-all duration-300 cursor-pointer group">
                   <div className="flex items-center space-x-3 sm:space-x-4">
@@ -772,7 +772,7 @@ export function BookingConfirmationPopup({
                 </TabsTrigger>
               </TabsList>
 
-              <div className="flex-1 overflow-y-auto">
+              <div className="flex-1 overflow-y-auto pb-4">
                 <TabsContent value="instructions" className="space-y-4 sm:space-y-6 p-4 sm:p-6">
                   <Alert className="border-blue-200 bg-blue-50 hover:shadow-md transition-all duration-300">
                     <AlertCircle className="h-4 w-4 text-blue-600" />
@@ -1291,7 +1291,7 @@ export function BookingConfirmationPopup({
                           <Label className="text-xs sm:text-sm font-medium text-gray-700">
                             Uploaded Files ({fileUploads.length})
                           </Label>
-                          <div className="space-y-2 max-h-32 overflow-y-auto">
+                          <div className="space-y-2 max-h-40 overflow-y-auto">
                             {fileUploads.map((fileUpload) => (
                               <div key={fileUpload.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg border">
                                 <div className="flex items-center space-x-3 flex-1 min-w-0">
