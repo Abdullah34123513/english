@@ -55,6 +55,13 @@ export function BookingList({ studentData, onUpdate }: BookingListProps) {
       if (response.ok) {
         const data = await response.json()
         setBookings(data)
+      } else if (response.status === 404) {
+        const errorData = await response.json()
+        if (errorData.requiresProfile) {
+          setError("Please complete your student profile first to view bookings")
+        } else {
+          setError("Failed to fetch bookings")
+        }
       } else {
         setError("Failed to fetch bookings")
       }

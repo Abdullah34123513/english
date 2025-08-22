@@ -12,17 +12,17 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Check if student profile exists, create if not
-    let studentProfile = await db.student.findUnique({
+    // Check if student profile exists
+    const studentProfile = await db.student.findUnique({
       where: { userId: session.user.id }
     })
 
     if (!studentProfile) {
-      studentProfile = await db.student.create({
-        data: {
-          userId: session.user.id,
-        }
-      })
+      return NextResponse.json({ 
+        error: "Student profile not found",
+        message: "Please complete your student profile first",
+        requiresProfile: true 
+      }, { status: 404 })
     }
 
     const bookings = await db.booking.findMany({
@@ -61,17 +61,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Check if student profile exists, create if not
-    let studentProfile = await db.student.findUnique({
+    // Check if student profile exists
+    const studentProfile = await db.student.findUnique({
       where: { userId: session.user.id }
     })
 
     if (!studentProfile) {
-      studentProfile = await db.student.create({
-        data: {
-          userId: session.user.id,
-        }
-      })
+      return NextResponse.json({ 
+        error: "Student profile not found",
+        message: "Please complete your student profile first before booking",
+        requiresProfile: true 
+      }, { status: 404 })
     }
 
     const { teacherId, startTime, endTime } = await request.json()
