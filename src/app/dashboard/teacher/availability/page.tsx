@@ -60,21 +60,27 @@ export default function TeacherAvailabilityPage() {
 
   const fetchAvailability = async () => {
     try {
+      console.log('Fetching availability...')
       const response = await fetch("/api/teacher/availability")
+      console.log('Response status:', response.status)
       if (response.ok) {
         const data = await response.json()
+        console.log('Fetched data:', data)
         if (Array.isArray(data) && data.length > 0) {
           setAvailability(data)
         } else {
+          console.log('No availability data, initializing default')
           // Initialize default availability if none exists
           initializeDefaultAvailability()
         }
       } else {
+        console.log('Fetch failed, initializing default')
         // Initialize default availability if fetch fails
         initializeDefaultAvailability()
       }
     } catch (error) {
       console.error("Failed to fetch availability:", error)
+      console.log('Error occurred, initializing default')
       initializeDefaultAvailability()
     } finally {
       setLoading(false)
@@ -98,13 +104,36 @@ export default function TeacherAvailabilityPage() {
   }
 
   const toggleAvailability = (slotId: string) => {
-    setAvailability(prev => 
-      prev.map(slot => 
+    console.log('Toggling slot:', slotId)
+    console.log('Current availability:', availability)
+    
+    setAvailability(prev => {
+      const slotExists = prev.some(slot => slot.id === slotId)
+      
+      if (!slotExists) {
+        // If slot doesn't exist, create it
+        const [dayOfWeek, startTime] = slotId.split('-')
+        const endTime = `${parseInt(startTime) + 1}:00`
+        const newSlot: TimeSlot = {
+          id: slotId,
+          dayOfWeek,
+          startTime,
+          endTime,
+          isAvailable: true
+        }
+        console.log('Creating new slot:', newSlot)
+        return [...prev, newSlot]
+      }
+      
+      // Toggle existing slot
+      const updated = prev.map(slot => 
         slot.id === slotId 
           ? { ...slot, isAvailable: !slot.isAvailable }
           : slot
       )
-    )
+      console.log('Updated availability:', updated)
+      return updated
+    })
   }
 
   const saveAvailability = async () => {
@@ -220,11 +249,12 @@ export default function TeacherAvailabilityPage() {
                       </div>
                       {daysOfWeek.map(day => {
                         const slot = availability.find(s => s.dayOfWeek === day && s.startTime === time)
+                        const slotId = `${day}-${time}`
                         return (
                           <button
-                            key={`${day}-${time}`}
-                            onClick={() => slot && toggleAvailability(slot.id)}
-                            className={`h-10 rounded-md text-xs font-medium transition-colors ${
+                            key={slotId}
+                            onClick={() => toggleAvailability(slotId)}
+                            className={`h-10 rounded-md text-xs font-medium transition-colors cursor-pointer ${
                               slot?.isAvailable
                                 ? "bg-green-100 text-green-800 hover:bg-green-200"
                                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -253,10 +283,12 @@ export default function TeacherAvailabilityPage() {
                 variant="outline" 
                 className="w-full justify-start"
                 onClick={() => {
+                  console.log('Clear All clicked')
                   const updatedAvailability = availability.map(slot => ({
                     ...slot,
                     isAvailable: false
                   }))
+                  console.log('Cleared availability:', updatedAvailability)
                   setAvailability(updatedAvailability)
                 }}
               >
@@ -267,12 +299,14 @@ export default function TeacherAvailabilityPage() {
                 variant="outline" 
                 className="w-full justify-start"
                 onClick={() => {
+                  console.log('Set Business Hours clicked')
                   const workDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
                   const workHours = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00"]
                   const updatedAvailability = availability.map(slot => ({
                     ...slot,
                     isAvailable: workDays.includes(slot.dayOfWeek) && workHours.includes(slot.startTime)
                   }))
+                  console.log('Business hours availability:', updatedAvailability)
                   setAvailability(updatedAvailability)
                 }}
               >
