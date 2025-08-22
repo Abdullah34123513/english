@@ -1652,11 +1652,14 @@ export default function ProfilePage() {
                         ) : (
                           <div className="p-3 bg-gray-50 rounded-md">
                             <div className="flex flex-wrap gap-2">
-                              {profile.learningGoals?.map((goal, index) => (
+                              {safeArray(profile.learningGoals).map((goal, index) => (
                                 <Badge key={index} variant="secondary" className="px-3 py-1">
                                   {goal}
                                 </Badge>
-                              )) || <span className="text-sm">No learning goals set</span>}
+                              ))}
+                              {safeArray(profile.learningGoals).length === 0 && (
+                                <span className="text-sm">No learning goals set</span>
+                              )}
                             </div>
                           </div>
                         )}
@@ -1700,11 +1703,14 @@ export default function ProfilePage() {
                           ) : (
                             <div className="p-3 bg-gray-50 rounded-md">
                               <div className="flex flex-wrap gap-2">
-                                {profile.preferredStudyDays?.map((day, index) => (
+                                {safeArray(profile.preferredStudyDays).map((day, index) => (
                                   <Badge key={index} variant="secondary" className="px-3 py-1">
                                     {day}
                                   </Badge>
-                                )) || <span className="text-sm">No preference set</span>}
+                                ))}
+                                {safeArray(profile.preferredStudyDays).length === 0 && (
+                                  <span className="text-sm">No preference set</span>
+                                )}
                               </div>
                             </div>
                           )}
@@ -1744,11 +1750,14 @@ export default function ProfilePage() {
                           ) : (
                             <div className="p-3 bg-gray-50 rounded-md">
                               <div className="flex flex-wrap gap-2">
-                                {profile.preferredStudyTimes?.map((time, index) => (
+                                {safeArray(profile.preferredStudyTimes).map((time, index) => (
                                   <Badge key={index} variant="secondary" className="px-3 py-1">
                                     {time}
                                   </Badge>
-                                )) || <span className="text-sm">No preference set</span>}
+                                ))}
+                                {safeArray(profile.preferredStudyTimes).length === 0 && (
+                                  <span className="text-sm">No preference set</span>
+                                )}
                               </div>
                             </div>
                           )}
@@ -1802,11 +1811,14 @@ export default function ProfilePage() {
                           ) : (
                             <div className="p-3 bg-gray-50 rounded-md">
                               <div className="flex flex-wrap gap-2">
-                                {profile.interests?.map((interest, index) => (
+                                {safeArray(profile.interests).map((interest, index) => (
                                   <Badge key={index} variant="outline" className="px-3 py-1">
                                     {interest}
                                   </Badge>
-                                )) || <span className="text-sm">No interests specified</span>}
+                                ))}
+                                {safeArray(profile.interests).length === 0 && (
+                                  <span className="text-sm">No interests specified</span>
+                                )}
                               </div>
                             </div>
                           )}
@@ -1858,11 +1870,14 @@ export default function ProfilePage() {
                           ) : (
                             <div className="p-3 bg-gray-50 rounded-md">
                               <div className="flex flex-wrap gap-2">
-                                {profile.hobbies?.map((hobby, index) => (
+                                {safeArray(profile.hobbies).map((hobby, index) => (
                                   <Badge key={index} variant="outline" className="px-3 py-1">
                                     {hobby}
                                   </Badge>
-                                )) || <span className="text-sm">No hobbies specified</span>}
+                                ))}
+                                {safeArray(profile.hobbies).length === 0 && (
+                                  <span className="text-sm">No hobbies specified</span>
+                                )}
                               </div>
                             </div>
                           )}
@@ -1965,11 +1980,14 @@ export default function ProfilePage() {
                           ) : (
                             <div className="p-3 bg-gray-50 rounded-md">
                               <div className="flex flex-wrap gap-2">
-                                {profile.specialties?.map((specialty, index) => (
+                                {safeArray(profile.specialties).map((specialty, index) => (
                                   <Badge key={index} variant="secondary" className="px-3 py-1">
                                     {specialty}
                                   </Badge>
-                                )) || <span className="text-sm">No specializations specified</span>}
+                                ))}
+                                {safeArray(profile.specialties).length === 0 && (
+                                  <span className="text-sm">No specializations specified</span>
+                                )}
                               </div>
                             </div>
                           )}
