@@ -1059,7 +1059,7 @@ export function BookingConfirmationPopup({
                   </Button>
                 </TabsContent>
 
-                <TabsContent value="payment" className="space-y-4 sm:space-y-6 p-4 sm:p-6 h-full overflow-y-auto pb-20 custom-scrollbar">
+                <TabsContent value="payment" className="space-y-4 sm:space-y-6 p-4 sm:p-6 h-full overflow-y-auto pb-32 custom-scrollbar">
                   <Alert className="border-green-200 bg-green-50 hover:shadow-md transition-all duration-300">
                     <AlertCircle className="h-4 w-4 text-green-600" />
                     <AlertDescription className="text-green-800 text-sm">
@@ -1067,7 +1067,7 @@ export function BookingConfirmationPopup({
                     </AlertDescription>
                   </Alert>
 
-                  <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+                  <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 mb-8">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
@@ -1414,7 +1414,7 @@ export function BookingConfirmationPopup({
                       </Alert>
                     )}
 
-                    <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-3 sm:space-y-0 pt-4">
+                    <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-3 sm:space-y-0 pt-8 pb-4">
                       <Button 
                         type="button" 
                         variant="outline" 
