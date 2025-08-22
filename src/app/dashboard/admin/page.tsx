@@ -21,10 +21,15 @@ import {
   Download,
   RefreshCw,
   CreditCard,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Settings,
+  AlertTriangle,
+  CheckCircle2,
+  XCircle
 } from "lucide-react"
 import { BookingManagement } from "@/components/admin/booking-management"
 import { PaymentApproval } from "@/components/admin/payment-approval"
+import { EnvironmentTesting } from "@/components/admin/environment-testing"
 
 interface DashboardStats {
   totalBookings: number
@@ -212,7 +217,7 @@ export default function AdminDashboard() {
 
         {/* Main Content */}
         <Tabs defaultValue="payments" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 bg-white p-1 rounded-xl shadow-sm">
+          <TabsList className="grid w-full grid-cols-4 bg-white p-1 rounded-xl shadow-sm">
             <TabsTrigger value="payments" className="data-[state=active]:bg-yellow-600 data-[state=active]:text-white rounded-lg transition-all duration-200">
               <CreditCard className="h-4 w-4 mr-2" />
               Payment Approvals
@@ -226,6 +231,10 @@ export default function AdminDashboard() {
               <Calendar className="h-4 w-4 mr-2" />
               Booking Management
             </TabsTrigger>
+            <TabsTrigger value="environment" className="data-[state=active]:bg-green-600 data-[state=active]:text-white rounded-lg transition-all duration-200">
+              <Settings className="h-4 w-4 mr-2" />
+              Environment Test
+            </TabsTrigger>
             <TabsTrigger value="analytics" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white rounded-lg transition-all duration-200">
               <TrendingUp className="h-4 w-4 mr-2" />
               Analytics
@@ -238,6 +247,10 @@ export default function AdminDashboard() {
 
           <TabsContent value="bookings">
             <BookingManagement onUpdate={fetchDashboardData} />
+          </TabsContent>
+
+          <TabsContent value="environment">
+            <EnvironmentTesting />
           </TabsContent>
 
           <TabsContent value="analytics">
