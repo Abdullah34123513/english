@@ -66,7 +66,17 @@ export async function GET() {
       return NextResponse.json({ error: "Teacher profile not found" }, { status: 404 })
     }
 
-    return NextResponse.json(teacher)
+    // Parse JSON fields
+    const parsedTeacher = {
+      ...teacher,
+      languages: teacher.languages ? JSON.parse(teacher.languages) : [],
+      specializations: teacher.specializations ? JSON.parse(teacher.specializations) : [],
+      preferredAgeGroups: teacher.preferredAgeGroups ? JSON.parse(teacher.preferredAgeGroups) : [],
+      certifications: teacher.certifications ? JSON.parse(teacher.certifications) : [],
+      specialties: teacher.specializations ? JSON.parse(teacher.specializations) : []
+    }
+
+    return NextResponse.json(parsedTeacher)
   } catch (error) {
     console.error("Error fetching teacher profile:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
@@ -81,7 +91,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { bio, hourlyRate, experience, education, languages, specialties, country, timezone } = await request.json()
+    const { bio, hourlyRate, experience, education, languages, specialties, country, timezone, preferredAgeGroups, certifications } = await request.json()
 
     const teacher = await db.teacher.update({
       where: { userId: session.user.id },
@@ -90,8 +100,10 @@ export async function PUT(request: NextRequest) {
         hourlyRate,
         experience,
         education,
-        languages,
-        specializations: specialties,
+        languages: languages && languages.length > 0 ? JSON.stringify(languages) : null,
+        specializations: specialties && specialties.length > 0 ? JSON.stringify(specialties) : null,
+        preferredAgeGroups: preferredAgeGroups && preferredAgeGroups.length > 0 ? JSON.stringify(preferredAgeGroups) : null,
+        certifications: certifications && certifications.length > 0 ? JSON.stringify(certifications) : null,
       }
     })
 

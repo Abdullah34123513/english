@@ -155,10 +155,20 @@ export async function GET() {
       learningStreak: learningStreak || 0
     }
 
-    return NextResponse.json({
+    // Parse JSON fields
+    const parsedStudent = {
       ...student,
+      learningGoals: student.learningGoals ? JSON.parse(student.learningGoals) : [],
+      preferredLearningStyle: student.preferredLearningStyle ? JSON.parse(student.preferredLearningStyle) : [],
+      teacherPreferences: student.teacherPreferences ? JSON.parse(student.teacherPreferences) : [],
+      interests: student.interests ? JSON.parse(student.interests) : [],
+      hobbies: student.hobbies ? JSON.parse(student.hobbies) : [],
+      preferredDays: student.preferredDays ? JSON.parse(student.preferredDays) : [],
+      preferredTimes: student.preferredTimes ? JSON.parse(student.preferredTimes) : [],
       statistics
-    })
+    }
+
+    return NextResponse.json(parsedStudent)
   } catch (error) {
     console.error("Error fetching student profile:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
