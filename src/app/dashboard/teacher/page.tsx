@@ -244,6 +244,26 @@ export default function TeacherDashboard() {
     return Math.round(((stats.thisMonthBookings - stats.lastMonthBookings) / stats.lastMonthBookings) * 100)
   }
 
+  const handleStartClass = () => {
+    if (upcomingClasses.length === 0) return
+    
+    // Find the next upcoming class that has a meet link
+    const nextClass = upcomingClasses.find(cls => cls.meetLink && cls.status === 'CONFIRMED')
+    
+    if (nextClass && nextClass.meetLink) {
+      window.open(nextClass.meetLink, '_blank')
+    } else {
+      // Show a message that no class is ready to start
+      alert('No confirmed class with meet link available. Please check your schedule.')
+    }
+  }
+
+  const handleMessageStudents = () => {
+    // For now, navigate to a placeholder messaging page
+    // In a real app, this would open a messaging interface
+    router.push('/dashboard/teacher/messages')
+  }
+
   if (status === "loading" || loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
@@ -370,19 +390,36 @@ export default function TeacherDashboard() {
               <CardDescription>Common tasks you might need</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Button className="w-full justify-start" variant="outline">
+              <Button 
+                className="w-full justify-start" 
+                variant="outline"
+                onClick={() => router.push("/dashboard/teacher/availability")}
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Set Availability
               </Button>
-              <Button className="w-full justify-start" variant="outline">
+              <Button 
+                className="w-full justify-start" 
+                variant="outline"
+                onClick={handleStartClass}
+                disabled={upcomingClasses.length === 0}
+              >
                 <Video className="h-4 w-4 mr-2" />
                 Start Class
               </Button>
-              <Button className="w-full justify-start" variant="outline">
+              <Button 
+                className="w-full justify-start" 
+                variant="outline"
+                onClick={handleMessageStudents}
+              >
                 <MessageCircle className="h-4 w-4 mr-2" />
                 Message Students
               </Button>
-              <Button className="w-full justify-start" variant="outline">
+              <Button 
+                className="w-full justify-start" 
+                variant="outline"
+                onClick={() => router.push("/dashboard/teacher/analytics")}
+              >
                 <BarChart3 className="h-4 w-4 mr-2" />
                 View Analytics
               </Button>
