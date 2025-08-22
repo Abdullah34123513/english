@@ -124,6 +124,7 @@ export default function ProfilePage() {
   const [uploadProgress, setUploadProgress] = useState(0)
   const [isUploading, setIsUploading] = useState(false)
   const [editForm, setEditForm] = useState<Partial<UserProfile>>({})
+  const [activeTab, setActiveTab] = useState("overview")
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -380,6 +381,14 @@ export default function ProfilePage() {
     }
   }
 
+  const handleTabChange = (value: string) => {
+    // If switching away from settings tab while editing, cancel editing
+    if (activeTab === "settings" && value !== "settings" && isEditing) {
+      handleCancelEdit()
+    }
+    setActiveTab(value)
+  }
+
   const handleFormChange = (field: string, value: any) => {
     setEditForm(prev => ({ ...prev, [field]: value }))
   }
@@ -433,21 +442,23 @@ export default function ProfilePage() {
               </Badge>
             </div>
             <div className="flex items-center space-x-4">
-              <Button 
-                onClick={isEditing ? handleSaveProfile : handleEditProfile}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                disabled={saving}
-              >
-                {saving ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : isEditing ? (
-                  <Save className="h-4 w-4 mr-2" />
-                ) : (
-                  <Edit className="h-4 w-4 mr-2" />
-                )}
-                {isEditing ? "Save Profile" : "Edit Profile"}
-              </Button>
-              {isEditing && (
+              {activeTab === "settings" && (
+                <Button 
+                  onClick={isEditing ? handleSaveProfile : handleEditProfile}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                  disabled={saving}
+                >
+                  {saving ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : isEditing ? (
+                    <Save className="h-4 w-4 mr-2" />
+                  ) : (
+                    <Edit className="h-4 w-4 mr-2" />
+                  )}
+                  {isEditing ? "Save Profile" : "Edit Profile"}
+                </Button>
+              )}
+              {activeTab === "settings" && isEditing && (
                 <Button 
                   variant="outline" 
                   onClick={handleCancelEdit}
@@ -777,7 +788,7 @@ export default function ProfilePage() {
 
           {/* Right Column - Detailed Info */}
           <div className="lg:col-span-2">
-            <Tabs defaultValue="overview" className="w-full">
+            <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
               <TabsList className="grid w-full grid-cols-5 bg-white/80 backdrop-blur-sm p-1 rounded-lg shadow-md">
                 <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
                   Overview
