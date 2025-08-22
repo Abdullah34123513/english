@@ -63,9 +63,14 @@ export default function TeacherAvailabilityPage() {
       const response = await fetch("/api/teacher/availability")
       if (response.ok) {
         const data = await response.json()
-        setAvailability(data)
+        if (Array.isArray(data) && data.length > 0) {
+          setAvailability(data)
+        } else {
+          // Initialize default availability if none exists
+          initializeDefaultAvailability()
+        }
       } else {
-        // Initialize default availability if none exists
+        // Initialize default availability if fetch fails
         initializeDefaultAvailability()
       }
     } catch (error) {
@@ -114,10 +119,16 @@ export default function TeacherAvailabilityPage() {
       })
 
       if (response.ok) {
+        // Show success message
+        alert("Availability saved successfully!")
         router.push("/dashboard/teacher")
+      } else {
+        const errorData = await response.json()
+        alert(`Failed to save availability: ${errorData.error || "Unknown error"}`)
       }
     } catch (error) {
       console.error("Failed to save availability:", error)
+      alert("Failed to save availability. Please check your connection and try again.")
     } finally {
       setSaving(false)
     }
