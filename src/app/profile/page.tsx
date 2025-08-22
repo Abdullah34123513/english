@@ -745,7 +745,7 @@ export default function ProfilePage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {recentActivity.map((activity) => (
+                {(recentActivity || []).map((activity) => (
                   <div key={activity.id} className="flex items-start space-x-3 p-3 rounded-lg bg-gray-50">
                     <div className="flex-shrink-0">
                       <activity.icon className="h-5 w-5 text-blue-600" />
@@ -1044,7 +1044,7 @@ export default function ProfilePage() {
                             <div>
                               <label className="text-sm font-medium text-gray-500">Learning Goals</label>
                               <div className="flex flex-wrap gap-2 mt-3">
-                                {profile.learningGoals.map((goal, index) => (
+                                {(profile.learningGoals || []).map((goal, index) => (
                                   <Badge key={index} variant="secondary" className="text-sm px-3 py-1">
                                     {goal}
                                   </Badge>
@@ -1092,7 +1092,7 @@ export default function ProfilePage() {
                     </CardHeader>
                     <CardContent>
                       <div className="flex flex-wrap gap-3">
-                        {profile.specialties.map((specialty, index) => (
+                        {(profile.specialties || []).map((specialty, index) => (
                           <Badge key={index} variant="secondary" className="text-sm px-4 py-2">
                             {specialty}
                           </Badge>
@@ -1116,7 +1116,7 @@ export default function ProfilePage() {
                         </CardHeader>
                         <CardContent>
                           <div className="flex flex-wrap gap-3">
-                            {profile.interests.map((interest, index) => (
+                            {(profile.interests || []).map((interest, index) => (
                               <Badge key={index} variant="outline" className="flex items-center space-x-2 px-4 py-2">
                                 {getInterestIcon(interest)}
                                 <span>{interest}</span>
@@ -1136,7 +1136,7 @@ export default function ProfilePage() {
                         </CardHeader>
                         <CardContent>
                           <div className="flex flex-wrap gap-3">
-                            {profile.hobbies.map((hobby, index) => (
+                            {(profile.hobbies || []).map((hobby, index) => (
                               <Badge key={index} variant="outline" className="px-4 py-2">
                                 {hobby}
                               </Badge>
@@ -1158,7 +1158,7 @@ export default function ProfilePage() {
                             <div>
                               <label className="text-sm font-medium text-gray-500">Preferred Days</label>
                               <div className="flex flex-wrap gap-2 mt-3">
-                                {profile.preferredStudyDays.map((day, index) => (
+                                {(profile.preferredStudyDays || []).map((day, index) => (
                                   <Badge key={index} variant="secondary" className="px-3 py-1">
                                     {day}
                                   </Badge>
@@ -1170,7 +1170,7 @@ export default function ProfilePage() {
                             <div>
                               <label className="text-sm font-medium text-gray-500">Preferred Times</label>
                               <div className="flex flex-wrap gap-2 mt-3">
-                                {profile.preferredStudyTimes.map((time, index) => (
+                                {(profile.preferredStudyTimes || []).map((time, index) => (
                                   <Badge key={index} variant="secondary" className="px-3 py-1">
                                     {time}
                                   </Badge>
