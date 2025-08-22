@@ -93,6 +93,23 @@ export async function PUT(request: NextRequest) {
 
     const { bio, hourlyRate, experience, education, languages, specialties, country, timezone, preferredAgeGroups, certifications } = await request.json()
 
+    // Helper function to safely handle array fields
+    const safeStringifyArray = (value: any): string | null => {
+      if (!value) return null
+      if (Array.isArray(value)) {
+        return value.length > 0 ? JSON.stringify(value) : null
+      }
+      if (typeof value === 'string') {
+        try {
+          const parsed = JSON.parse(value)
+          return Array.isArray(parsed) && parsed.length > 0 ? value : null
+        } catch {
+          return value ? JSON.stringify([value]) : null
+        }
+      }
+      return null
+    }
+
     const teacher = await db.teacher.update({
       where: { userId: session.user.id },
       data: {
@@ -100,10 +117,10 @@ export async function PUT(request: NextRequest) {
         hourlyRate,
         experience,
         education,
-        languages: languages && languages.length > 0 ? JSON.stringify(languages) : null,
-        specializations: specialties && specialties.length > 0 ? JSON.stringify(specialties) : null,
-        preferredAgeGroups: preferredAgeGroups && preferredAgeGroups.length > 0 ? JSON.stringify(preferredAgeGroups) : null,
-        certifications: certifications && certifications.length > 0 ? JSON.stringify(certifications) : null,
+        languages: safeStringifyArray(languages),
+        specializations: safeStringifyArray(specialties),
+        preferredAgeGroups: safeStringifyArray(preferredAgeGroups),
+        certifications: safeStringifyArray(certifications),
       }
     })
 

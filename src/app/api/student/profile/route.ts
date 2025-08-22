@@ -194,25 +194,42 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Student profile not found" }, { status: 404 })
     }
 
+    // Helper function to safely handle array fields
+    const safeStringifyArray = (value: any): string | null => {
+      if (!value) return null
+      if (Array.isArray(value)) {
+        return value.length > 0 ? JSON.stringify(value) : null
+      }
+      if (typeof value === 'string') {
+        try {
+          const parsed = JSON.parse(value)
+          return Array.isArray(parsed) && parsed.length > 0 ? value : null
+        } catch {
+          return value ? JSON.stringify([value]) : null
+        }
+      }
+      return null
+    }
+
     // Update student profile
     const updatedStudent = await db.student.update({
       where: { userId: session.user.id },
       data: {
-        age: data.age || null,
+        age: data.age ? String(data.age) : null,
         country: data.country || null,
         nativeLanguage: data.nativeLanguage || null,
         timezone: data.timezone || null,
         currentLevel: data.currentLevel || null,
-        learningGoals: data.learningGoals && data.learningGoals.length > 0 ? JSON.stringify(data.learningGoals) : null,
+        learningGoals: safeStringifyArray(data.learningGoals),
         targetScore: data.targetScore || null,
-        preferredLearningStyle: data.preferredLearningStyle && data.preferredLearningStyle.length > 0 ? JSON.stringify(data.preferredLearningStyle) : null,
+        preferredLearningStyle: safeStringifyArray(data.preferredLearningStyle),
         studyFrequency: data.studyFrequency || null,
         sessionDuration: data.sessionDuration || null,
-        teacherPreferences: data.teacherPreferences && data.teacherPreferences.length > 0 ? JSON.stringify(data.teacherPreferences) : null,
-        interests: data.interests && data.interests.length > 0 ? JSON.stringify(data.interests) : null,
-        hobbies: data.hobbies && data.hobbies.length > 0 ? JSON.stringify(data.hobbies) : null,
-        preferredDays: data.preferredDays && data.preferredDays.length > 0 ? JSON.stringify(data.preferredDays) : null,
-        preferredTimes: data.preferredTimes && data.preferredTimes.length > 0 ? JSON.stringify(data.preferredTimes) : null,
+        teacherPreferences: safeStringifyArray(data.teacherPreferences),
+        interests: safeStringifyArray(data.interests),
+        hobbies: safeStringifyArray(data.hobbies),
+        preferredDays: safeStringifyArray(data.preferredDays),
+        preferredTimes: safeStringifyArray(data.preferredTimes),
         previousExperience: data.previousExperience || null,
         specificNeeds: data.specificNeeds || null,
         motivation: data.motivation || null,
