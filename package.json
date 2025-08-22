@@ -11,7 +11,9 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:reset": "prisma migrate reset",
-    "db:seed": "node prisma/seed-basic.js"
+    "db:seed": "node prisma/seed-basic.js",
+    "db:seed:admin": "node prisma/seed-admin.js",
+    "db:seed:comprehensive": "node prisma/seed-comprehensive.js"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
