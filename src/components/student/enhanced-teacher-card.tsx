@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -69,6 +70,7 @@ interface EnhancedTeacherCardProps {
 }
 
 export function EnhancedTeacherCard({ teacher, studentId, onBookClass, onSubmitPayment }: EnhancedTeacherCardProps) {
+  const router = useRouter()
   const [selectedDate, setSelectedDate] = useState<Date>()
   const [selectedTime, setSelectedTime] = useState("")
   const [bookingLoading, setBookingLoading] = useState(false)
@@ -766,7 +768,7 @@ export function EnhancedTeacherCard({ teacher, studentId, onBookClass, onSubmitP
             variant="outline" 
             className="w-full border-gray-300 hover:border-blue-300 text-gray-700 hover:text-blue-600 font-medium transition-all duration-200 group relative overflow-hidden"
             onClick={() => {
-              // View profile functionality
+              router.push(`/teachers/${teacher.id}`)
             }}
           >
             <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 opacity-0 group-hover:opacity-5 transition-opacity"></div>
