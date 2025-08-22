@@ -9,16 +9,19 @@ declare module "next-auth" {
       name?: string | null
       image?: string | null
       role: UserRole
+      emailVerified: boolean
     }
   }
 
   interface User {
     role: UserRole
+    emailVerified: boolean
   }
 }
 
 declare module "next-auth/jwt" {
   interface JWT {
     role: UserRole
+    emailVerified: boolean
   }
 }

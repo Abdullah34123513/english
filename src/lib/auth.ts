@@ -23,8 +23,7 @@ export const authOptions: NextAuthOptions = {
           return null
         }
 
-        // For now, we'll just create a simple user
-        // In a real app, you'd verify the password against a hashed version
+        // Find user by email
         const user = await db.user.findUnique({
           where: {
             email: credentials.email,
@@ -35,12 +34,19 @@ export const authOptions: NextAuthOptions = {
           return null
         }
 
+        // Check if email is verified (only for credentials provider)
+        if (!user.emailVerified) {
+          console.log(`User ${user.email} has not verified their email`)
+          return null
+        }
+
         return {
           id: user.id,
           email: user.email,
           name: user.name,
           image: user.image,
           role: user.role,
+          emailVerified: user.emailVerified
         }
       },
     }),
@@ -52,6 +58,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.role = user.role
+        token.emailVerified = user.emailVerified
       }
       return token
     },
@@ -59,6 +66,7 @@ export const authOptions: NextAuthOptions = {
       if (token) {
         session.user.id = token.sub!
         session.user.role = token.role as UserRole
+        session.user.emailVerified = token.emailVerified as boolean
       }
       return session
     },

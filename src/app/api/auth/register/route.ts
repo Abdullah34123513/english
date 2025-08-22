@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { UserRole } from "@prisma/client"
 import bcrypt from "bcryptjs"
+import { createEmailVerification } from "@/lib/email-verification"
+import { emailService } from "@/lib/email-service"
 
 export async function POST(request: NextRequest) {
   try {
@@ -43,12 +45,14 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12)
 
-    // Create user
+    // Create user with email verification fields
     const user = await db.user.create({
       data: {
         name,
         email,
+        password: hashedPassword,
         role: role as UserRole,
+        emailVerified: false // Set to false initially
       }
     })
 
@@ -125,8 +129,43 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Create email verification token and send email
+    let emailSent = false
+    let emailMessage = ""
+
+    if (emailService.isConfigured()) {
+      try {
+        const verificationToken = await createEmailVerification(user.id)
+        if (verificationToken) {
+          emailSent = await emailService.sendVerificationEmail(
+            user.email,
+            verificationToken,
+            user.name || undefined
+          )
+          
+          if (emailSent) {
+            emailMessage = "Account created successfully! Please check your email to verify your account."
+          } else {
+            emailMessage = "Account created successfully! However, we couldn't send the verification email. Please contact support."
+          }
+        } else {
+          emailMessage = "Account created successfully! However, we couldn't generate the verification token. Please contact support."
+        }
+      } catch (error) {
+        console.error("Error sending verification email:", error)
+        emailMessage = "Account created successfully! However, we encountered an issue sending the verification email. Please contact support."
+      }
+    } else {
+      emailMessage = "Account created successfully! Email verification is not configured. Please contact an administrator to verify your account."
+    }
+
     return NextResponse.json(
-      { message: "User created successfully" },
+      { 
+        message: emailMessage,
+        emailSent,
+        requiresVerification: true,
+        userId: user.id
+      },
       { status: 201 }
     )
   } catch (error) {

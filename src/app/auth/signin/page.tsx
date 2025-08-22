@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { signIn, getSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -19,7 +19,10 @@ import {
   Sparkles,
   ArrowRight,
   Mail,
-  Lock
+  Lock,
+  CheckCircle,
+  AlertCircle,
+  RefreshCw
 } from "lucide-react"
 import { motion } from "framer-motion"
 
@@ -29,12 +32,31 @@ export default function SignIn() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [showPassword, setShowPassword] = useState(false)
+  const [verificationStatus, setVerificationStatus] = useState<{
+    isVerified: boolean
+    hasPendingToken: boolean
+    isExpired: boolean
+  } | null>(null)
+  const [resendLoading, setResendLoading] = useState(false)
+  const [message, setMessage] = useState("")
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    const msg = searchParams.get('message')
+    if (msg === 'check_email') {
+      setMessage('Please check your email and click the verification link to activate your account.')
+    }
+    if (msg === 'email_verified') {
+      setMessage('Email verified successfully! You can now sign in.')
+    }
+  }, [searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError("")
+    setMessage("")
 
     try {
       const result = await signIn("credentials", {
@@ -44,7 +66,14 @@ export default function SignIn() {
       })
 
       if (result?.error) {
-        setError("Invalid credentials")
+        // Check if the error is related to email verification
+        if (result.error.includes("not verified") || result.error.includes("verify")) {
+          setError("Please verify your email address before signing in.")
+          // Check verification status
+          await checkVerificationStatus()
+        } else {
+          setError("Invalid credentials")
+        }
       } else {
         const session = await getSession()
         if (session?.user?.role === "STUDENT") {
@@ -59,6 +88,45 @@ export default function SignIn() {
       setError("An error occurred. Please try again.")
     } finally {
       setLoading(false)
+    }
+  }
+
+  const checkVerificationStatus = async () => {
+    try {
+      const response = await fetch('/api/verification-status')
+      if (response.ok) {
+        const status = await response.json()
+        setVerificationStatus(status)
+      }
+    } catch (error) {
+      console.error('Error checking verification status:', error)
+    }
+  }
+
+  const handleResendVerification = async () => {
+    if (!email) {
+      setError("Please enter your email address first")
+      return
+    }
+
+    setResendLoading(true)
+    try {
+      const response = await fetch('/api/resend-verification', {
+        method: 'POST',
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setMessage("Verification email sent successfully! Please check your inbox.")
+        setError("")
+      } else {
+        setError(data.error || "Failed to resend verification email")
+      }
+    } catch (error) {
+      setError("An error occurred while resending the verification email")
+    } finally {
+      setResendLoading(false)
     }
   }
 
@@ -286,6 +354,66 @@ export default function SignIn() {
                       <Alert variant="destructive" className="border-red-200 bg-red-50">
                         <AlertDescription className="text-red-700">
                           {error}
+                        </AlertDescription>
+                      </Alert>
+                    </motion.div>
+                  )}
+
+                  {/* Success/Info Message */}
+                  {message && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <Alert className="border-blue-200 bg-blue-50">
+                        <AlertDescription className="text-blue-700">
+                          {message}
+                        </AlertDescription>
+                      </Alert>
+                    </motion.div>
+                  )}
+
+                  {/* Verification Status */}
+                  {verificationStatus && !verificationStatus.isVerified && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <Alert className="border-yellow-200 bg-yellow-50">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription className="text-yellow-700">
+                          <div className="space-y-2">
+                            <p>Your email address has not been verified yet.</p>
+                            {verificationStatus.hasPendingToken && !verificationStatus.isExpired && (
+                              <p className="text-sm">A verification email was sent recently. Please check your inbox.</p>
+                            )}
+                            {(verificationStatus.isExpired || !verificationStatus.hasPendingToken) && (
+                              <div className="space-y-2">
+                                <p className="text-sm">Click the button below to resend the verification email.</p>
+                                <Button
+                                  onClick={handleResendVerification}
+                                  disabled={resendLoading || !email}
+                                  variant="outline"
+                                  size="sm"
+                                  className="w-full"
+                                >
+                                  {resendLoading ? (
+                                    <>
+                                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                      Sending...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <RefreshCw className="h-4 w-4 mr-2" />
+                                      Resend Verification Email
+                                    </>
+                                  )}
+                                </Button>
+                              </div>
+                            )}
+                          </div>
                         </AlertDescription>
                       </Alert>
                     </motion.div>

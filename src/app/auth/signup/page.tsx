@@ -68,10 +68,18 @@ export default function SignUp() {
       })
 
       if (response.ok) {
-        setSuccess("Teacher account created successfully! Redirecting to sign in...")
-        setTimeout(() => {
-          router.push("/auth/signin")
-        }, 2000)
+        const data = await response.json()
+        if (data.requiresVerification) {
+          setSuccess("Account created successfully! Please check your email to verify your account.")
+          setTimeout(() => {
+            router.push("/auth/signin?message=check_email")
+          }, 3000)
+        } else {
+          setSuccess("Account created successfully! Redirecting to sign in...")
+          setTimeout(() => {
+            router.push("/auth/signin")
+          }, 2000)
+        }
       } else {
         const data = await response.json()
         setError(data.error || "An error occurred. Please try again.")
@@ -103,10 +111,18 @@ export default function SignUp() {
       })
 
       if (response.ok) {
-        setSuccess("Student account created successfully! Redirecting to sign in...")
-        setTimeout(() => {
-          router.push("/auth/signin")
-        }, 2000)
+        const data = await response.json()
+        if (data.requiresVerification) {
+          setSuccess("Account created successfully! Please check your email to verify your account.")
+          setTimeout(() => {
+            router.push("/auth/signin?message=check_email")
+          }, 3000)
+        } else {
+          setSuccess("Student account created successfully! Redirecting to sign in...")
+          setTimeout(() => {
+            router.push("/auth/signin")
+          }, 2000)
+        }
       } else {
         const data = await response.json()
         setError(data.error || "An error occurred. Please try again.")
