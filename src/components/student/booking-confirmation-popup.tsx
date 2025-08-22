@@ -486,6 +486,22 @@ export function BookingConfirmationPopup({
 
   return (
     <TooltipProvider>
+      <style jsx>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: rgba(0, 0, 0, 0.1);
+          border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(59, 130, 246, 0.5);
+          border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(59, 130, 246, 0.7);
+        }
+      `}</style>
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-4xl lg:max-w-6xl max-h-[90vh] sm:max-h-[95vh] bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 flex flex-col">
           {/* Animation Overlay */}
@@ -646,7 +662,7 @@ export function BookingConfirmationPopup({
                   Review your booking details before payment
                 </CardDescription>
               </CardHeader>
-              <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6 flex-1 overflow-y-auto">
+              <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6 flex-1 overflow-y-auto custom-scrollbar">
                 {/* Teacher Info */}
                 <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-3 sm:p-4 rounded-xl hover:shadow-md transition-all duration-300 cursor-pointer group">
                   <div className="flex items-center space-x-3 sm:space-x-4">
@@ -772,8 +788,8 @@ export function BookingConfirmationPopup({
                 </TabsTrigger>
               </TabsList>
 
-              <div className="flex-1 overflow-y-auto pb-4">
-                <TabsContent value="instructions" className="space-y-4 sm:space-y-6 p-4 sm:p-6">
+              <div className="flex-1">
+                <TabsContent value="instructions" className="space-y-4 sm:space-y-6 p-4 sm:p-6 h-full overflow-y-auto pb-20 custom-scrollbar">
                   <Alert className="border-blue-200 bg-blue-50 hover:shadow-md transition-all duration-300">
                     <AlertCircle className="h-4 w-4 text-blue-600" />
                     <AlertDescription className="text-blue-800 text-sm">
@@ -1043,7 +1059,7 @@ export function BookingConfirmationPopup({
                   </Button>
                 </TabsContent>
 
-                <TabsContent value="payment" className="space-y-4 sm:space-y-6 p-4 sm:p-6">
+                <TabsContent value="payment" className="space-y-4 sm:space-y-6 p-4 sm:p-6 h-full overflow-y-auto pb-20 custom-scrollbar">
                   <Alert className="border-green-200 bg-green-50 hover:shadow-md transition-all duration-300">
                     <AlertCircle className="h-4 w-4 text-green-600" />
                     <AlertDescription className="text-green-800 text-sm">
@@ -1291,7 +1307,7 @@ export function BookingConfirmationPopup({
                           <Label className="text-xs sm:text-sm font-medium text-gray-700">
                             Uploaded Files ({fileUploads.length})
                           </Label>
-                          <div className="space-y-2 max-h-40 overflow-y-auto">
+                          <div className="space-y-2 max-h-40 overflow-y-auto custom-scrollbar">
                             {fileUploads.map((fileUpload) => (
                               <div key={fileUpload.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg border">
                                 <div className="flex items-center space-x-3 flex-1 min-w-0">
