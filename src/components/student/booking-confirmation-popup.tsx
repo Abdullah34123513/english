@@ -561,9 +561,10 @@ export function BookingConfirmationPopup({
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowHelp(!showHelp)}
-                  className="h-8 w-8 p-0"
+                  className="group h-9 w-9 p-0 rounded-full hover:bg-blue-100 transition-all duration-300 transform hover:scale-110 hover:shadow-md relative overflow-hidden"
                 >
-                  <HelpCircle className="h-4 w-4" />
+                  <HelpCircle className="h-4 w-4 text-blue-600 group-hover:scale-110 transition-transform duration-300" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-100 to-purple-100 opacity-0 group-hover:opacity-50 transition-opacity duration-300 rounded-full"></div>
                 </Button>
               </div>
             </div>
@@ -742,24 +743,26 @@ export function BookingConfirmationPopup({
                 </div>
 
                 {/* Quick Actions */}
-                <div className="flex justify-center space-x-2 pt-2">
+                <div className="flex justify-center space-x-3 pt-4">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setShowHelp(!showHelp)}
-                    className="text-xs"
+                    className="group border-2 border-blue-200 text-blue-700 hover:border-blue-300 hover:bg-blue-50 font-medium text-xs transition-all duration-300 transform hover:scale-[1.05] hover:shadow-md rounded-lg py-2 px-4 relative overflow-hidden"
                   >
-                    <HelpCircle className="h-3 w-3 mr-1" />
+                    <HelpCircle className="h-3 w-3 mr-1 group-hover:scale-110 transition-transform duration-300" />
                     Help
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-blue-100 opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setActiveTab("payment")}
-                    className="text-xs"
+                    className="group border-2 border-emerald-200 text-emerald-700 hover:border-emerald-300 hover:bg-emerald-50 font-medium text-xs transition-all duration-300 transform hover:scale-[1.05] hover:shadow-md rounded-lg py-2 px-4 relative overflow-hidden"
                   >
-                    <CreditCard className="h-3 w-3 mr-1" />
+                    <CreditCard className="h-3 w-3 mr-1 group-hover:scale-110 transition-transform duration-300" />
                     Pay Now
+                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-50 to-emerald-100 opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
                   </Button>
                 </div>
               </CardContent>
@@ -889,12 +892,13 @@ export function BookingConfirmationPopup({
                                   e.stopPropagation()
                                   toggleBankExpansion(bank.name)
                                 }}
-                                className="h-6 w-6 p-0"
+                                className="group h-8 w-8 p-0 rounded-full hover:bg-gray-100 transition-all duration-300 transform hover:scale-110 hover:shadow-md relative overflow-hidden"
                               >
                                 {expandedBank === bank.name ? 
-                                  <ChevronUp className="h-3 w-3" /> : 
-                                  <ChevronDown className="h-3 w-3" />
+                                  <ChevronUp className="h-4 w-4 text-gray-600 group-hover:text-blue-600 group-hover:scale-110 transition-all duration-300" /> : 
+                                  <ChevronDown className="h-4 w-4 text-gray-600 group-hover:text-blue-600 group-hover:scale-110 transition-all duration-300" />
                                 }
+                                <div className="absolute inset-0 bg-gradient-to-r from-gray-100 to-blue-100 opacity-0 group-hover:opacity-30 transition-opacity duration-300 rounded-full"></div>
                               </Button>
                             </div>
                           </CardTitle>
@@ -915,12 +919,13 @@ export function BookingConfirmationPopup({
                                     e.stopPropagation()
                                     copyToClipboard(bank.accountNumber, `account-${index}`)
                                   }}
-                                  className="shrink-0 h-8 w-8 sm:h-auto sm:w-auto p-1 sm:p-2 transition-all duration-200 hover:bg-blue-50"
+                                  className="group shrink-0 h-9 w-9 sm:h-10 sm:w-10 p-1 sm:p-2 transition-all duration-300 transform hover:scale-110 hover:bg-blue-50 hover:shadow-md rounded-lg border border-gray-200 hover:border-blue-300 relative overflow-hidden"
                                 >
                                   {copiedField === `account-${index}` ? 
-                                    <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" /> : 
-                                    <Copy className="h-3 w-3 sm:h-4 sm:w-4" />
+                                    <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 group-hover:scale-110 transition-transform duration-300" /> : 
+                                    <Copy className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 group-hover:text-blue-600 group-hover:scale-110 transition-all duration-300" />
                                   }
+                                  <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-blue-100 opacity-0 group-hover:opacity-30 transition-opacity duration-300 rounded-lg"></div>
                                 </Button>
                               </div>
                             </div>
@@ -937,12 +942,13 @@ export function BookingConfirmationPopup({
                                     e.stopPropagation()
                                     copyToClipboard(bank.iban, `iban-${index}`)
                                   }}
-                                  className="shrink-0 h-8 w-8 sm:h-auto sm:w-auto p-1 sm:p-2 transition-all duration-200 hover:bg-blue-50"
+                                  className="group shrink-0 h-9 w-9 sm:h-10 sm:w-10 p-1 sm:p-2 transition-all duration-300 transform hover:scale-110 hover:bg-blue-50 hover:shadow-md rounded-lg border border-gray-200 hover:border-blue-300 relative overflow-hidden"
                                 >
                                   {copiedField === `iban-${index}` ? 
-                                    <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" /> : 
-                                    <Copy className="h-3 w-3 sm:h-4 sm:w-4" />
+                                    <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 group-hover:scale-110 transition-transform duration-300" /> : 
+                                    <Copy className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 group-hover:text-blue-600 group-hover:scale-110 transition-all duration-300" />
                                   }
+                                  <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-blue-100 opacity-0 group-hover:opacity-30 transition-opacity duration-300 rounded-lg"></div>
                                 </Button>
                               </div>
                             </div>
@@ -1030,13 +1036,18 @@ export function BookingConfirmationPopup({
                         <div key={index} className="border border-gray-200 rounded-lg">
                           <button
                             onClick={() => toggleFAQ(faq.question)}
-                            className="w-full p-3 text-left flex items-center justify-between hover:bg-gray-50 transition-colors duration-200"
+                            className="group w-full p-3 text-left flex items-center justify-between hover:bg-gray-50 transition-all duration-300 rounded-lg border border-transparent hover:border-gray-200"
                           >
-                            <span className="text-xs sm:text-sm font-medium text-gray-900">{faq.question}</span>
-                            {expandedFAQ === faq.question ? 
-                              <ChevronUp className="h-4 w-4 text-gray-500" /> : 
-                              <ChevronDown className="h-4 w-4 text-gray-500" />
-                            }
+                            <span className="text-xs sm:text-sm font-medium text-gray-900 group-hover:text-blue-600 transition-colors duration-300">{faq.question}</span>
+                            <div className="flex items-center space-x-2">
+                              {expandedFAQ === faq.question ? 
+                                <ChevronUp className="h-4 w-4 text-gray-500 group-hover:text-blue-600 group-hover:scale-110 transition-all duration-300" /> : 
+                                <ChevronDown className="h-4 w-4 text-gray-500 group-hover:text-blue-600 group-hover:scale-110 transition-all duration-300" />
+                              }
+                              <div className="h-6 w-6 rounded-full bg-gray-100 group-hover:bg-blue-100 transition-all duration-300 flex items-center justify-center">
+                                <HelpCircle className="h-3 w-3 text-gray-500 group-hover:text-blue-600 transition-colors duration-300" />
+                              </div>
+                            </div>
                           </button>
                           {expandedFAQ === faq.question && (
                             <div className="p-3 pt-0 border-t border-gray-100 animate-in slide-in-from-top-2 duration-300">
@@ -1050,12 +1061,21 @@ export function BookingConfirmationPopup({
 
                   <Button 
                     onClick={() => setActiveTab("payment")}
-                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-2 sm:py-3 text-sm sm:text-base transition-all duration-300 hover:shadow-lg transform hover:scale-[1.02]"
+                    className="group w-full bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 hover:from-emerald-700 hover:via-teal-700 hover:to-emerald-700 text-white font-bold py-3 sm:py-4 text-sm sm:text-base transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl rounded-xl relative overflow-hidden bg-size-200 bg-pos-0 hover:bg-pos-100"
                     size="lg"
+                    style={{
+                      backgroundSize: '200% 200%',
+                      backgroundImage: 'linear-gradient(45deg, #059669, #0d9488, #059669)'
+                    }}
                   >
-                    <span className="hidden sm:inline">I've Made the Payment - Continue to Upload</span>
-                    <span className="sm:hidden">Continue to Upload</span>
-                    <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 ml-1 sm:ml-2" />
+                    <span className="relative z-10 flex items-center justify-center">
+                      <span className="hidden sm:inline font-medium">I've Made the Payment - Continue to Upload</span>
+                      <span className="sm:hidden font-medium">Continue to Upload</span>
+                      <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 ml-2 sm:ml-3 group-hover:translate-x-1 transition-transform duration-300" />
+                    </span>
+                    <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+                    <div className="absolute -inset-1 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-xl opacity-0 group-hover:opacity-30 blur-sm transition-opacity duration-300"></div>
+                    <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/20 via-transparent to-transparent opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
                   </Button>
                 </TabsContent>
 
@@ -1417,30 +1437,42 @@ export function BookingConfirmationPopup({
                     <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-3 sm:space-y-0 pt-8 pb-4">
                       <Button 
                         type="button" 
-                        variant="outline" 
+                        variant="outline"
                         onClick={onClose}
-                        className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50 text-sm sm:text-base transition-all duration-200"
+                        className="group flex-1 border-2 border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50 text-sm sm:text-base font-medium transition-all duration-300 transform hover:scale-[1.02] hover:shadow-md rounded-xl py-3 sm:py-4 relative overflow-hidden"
                         size="lg"
                       >
-                        Cancel
+                        <span className="relative z-10 flex items-center justify-center">
+                          <X className="h-4 w-4 sm:h-5 sm:w-5 mr-2 group-hover:rotate-90 transition-transform duration-300" />
+                          Cancel
+                        </span>
+                        <div className="absolute inset-0 bg-gradient-to-r from-gray-50 to-gray-100 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       </Button>
                       <Button 
                         type="submit" 
                         disabled={isSubmitting}
-                        className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold text-sm sm:text-base transition-all duration-200 hover:shadow-lg transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="group flex-1 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 hover:from-blue-700 hover:via-purple-700 hover:to-blue-700 text-white font-bold text-sm sm:text-base transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none rounded-xl py-3 sm:py-4 relative overflow-hidden bg-size-200 bg-pos-0 hover:bg-pos-100"
                         size="lg"
+                        style={{
+                          backgroundSize: '200% 200%',
+                          backgroundImage: 'linear-gradient(45deg, #2563eb, #9333ea, #2563eb)'
+                        }}
                       >
-                        {isSubmitting ? (
-                          <>
-                            <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 mr-2 animate-spin" />
-                            <span className="text-xs sm:text-sm">Submitting...</span>
-                          </>
-                        ) : (
-                          <>
-                            <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
-                            <span className="text-xs sm:text-sm">Submit Payment Proof</span>
-                          </>
-                        )}
+                        <span className="relative z-10 flex items-center justify-center">
+                          {isSubmitting ? (
+                            <>
+                              <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 mr-2 animate-spin" />
+                              <span className="text-xs sm:text-sm font-medium">Processing...</span>
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 mr-2 group-hover:scale-110 transition-transform duration-300" />
+                              <span className="text-xs sm:text-sm font-medium">Submit Payment Proof</span>
+                            </>
+                          )}
+                        </span>
+                        <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+                        <div className="absolute -inset-1 bg-gradient-to-r from-blue-400 to-purple-400 rounded-xl opacity-0 group-hover:opacity-30 blur-sm transition-opacity duration-300"></div>
                       </Button>
                     </div>
                   </form>
