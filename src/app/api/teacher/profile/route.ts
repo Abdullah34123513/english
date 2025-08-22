@@ -115,7 +115,7 @@ export async function PUT(request: NextRequest) {
       data: {
         bio,
         hourlyRate,
-        experience,
+        experience: experience ? String(experience) : null,
         education,
         languages: safeStringifyArray(languages),
         specializations: safeStringifyArray(specialties),
