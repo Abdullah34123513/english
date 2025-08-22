@@ -12,7 +12,9 @@ import {
   Plus, 
   Trash2, 
   Save,
-  ArrowLeft
+  ArrowLeft,
+  CheckCircle,
+  XCircle
 } from "lucide-react"
 import Link from "next/link"
 
@@ -70,12 +72,10 @@ export default function TeacherAvailabilityPage() {
           setAvailability(data)
         } else {
           console.log('No availability data, initializing default')
-          // Initialize default availability if none exists
           initializeDefaultAvailability()
         }
       } else {
         console.log('Fetch failed, initializing default')
-        // Initialize default availability if fetch fails
         initializeDefaultAvailability()
       }
     } catch (error) {
@@ -103,37 +103,14 @@ export default function TeacherAvailabilityPage() {
     setAvailability(defaultAvailability)
   }
 
-  const toggleAvailability = (slotId: string) => {
-    console.log('Toggling slot:', slotId)
-    console.log('Current availability:', availability)
-    
-    setAvailability(prev => {
-      const slotExists = prev.some(slot => slot.id === slotId)
-      
-      if (!slotExists) {
-        // If slot doesn't exist, create it
-        const [dayOfWeek, startTime] = slotId.split('-')
-        const endTime = `${parseInt(startTime) + 1}:00`
-        const newSlot: TimeSlot = {
-          id: slotId,
-          dayOfWeek,
-          startTime,
-          endTime,
-          isAvailable: true
-        }
-        console.log('Creating new slot:', newSlot)
-        return [...prev, newSlot]
-      }
-      
-      // Toggle existing slot
-      const updated = prev.map(slot => 
-        slot.id === slotId 
-          ? { ...slot, isAvailable: !slot.isAvailable }
-          : slot
-      )
-      console.log('Updated availability:', updated)
-      return updated
-    })
+  const setAvailabilityPattern = (pattern: (day: string, time: string) => boolean) => {
+    console.log('Setting availability pattern...')
+    const updatedAvailability = availability.map(slot => ({
+      ...slot,
+      isAvailable: pattern(slot.dayOfWeek, slot.startTime)
+    }))
+    console.log('Updated availability:', updatedAvailability)
+    setAvailability(updatedAvailability)
   }
 
   const saveAvailability = async () => {
@@ -148,7 +125,6 @@ export default function TeacherAvailabilityPage() {
       })
 
       if (response.ok) {
-        // Show success message
         alert("Availability saved successfully!")
         router.push("/dashboard/teacher")
       } else {
@@ -163,12 +139,12 @@ export default function TeacherAvailabilityPage() {
     }
   }
 
-  const getAvailabilityByDay = (day: string) => {
-    return availability.filter(slot => slot.dayOfWeek === day)
-  }
-
   const getAvailableSlotsCount = () => {
     return availability.filter(slot => slot.isAvailable).length
+  }
+
+  const getAvailableSlotsByDay = (day: string) => {
+    return availability.filter(slot => slot.dayOfWeek === day && slot.isAvailable)
   }
 
   if (status === "loading" || loading) {
@@ -194,12 +170,12 @@ export default function TeacherAvailabilityPage() {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
               <Button variant="ghost" asChild>
-                <Link href="/dashboard/teacher/settings">
+                <Link href="/dashboard/teacher">
                   <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back to Settings
+                  Back to Dashboard
                 </Link>
               </Button>
-              <h1 className="text-2xl font-bold text-gray-900">Availability</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Set Availability</h1>
               <Badge variant="secondary">
                 {getAvailableSlotsCount()} slots available
               </Badge>
@@ -216,107 +192,155 @@ export default function TeacherAvailabilityPage() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <Card>
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Calendar className="h-5 w-5" />
-                <span>Weekly Availability</span>
+              <CardTitle className="text-lg flex items-center">
+                <Trash2 className="h-5 w-5 mr-2 text-red-600" />
+                Clear All
               </CardTitle>
               <CardDescription>
-                Click on time slots to toggle availability. Students will only be able to book lessons during your available times.
+                Remove all availability slots
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
-                <div className="min-w-full">
-                  {/* Header row */}
-                  <div className="grid grid-cols-8 gap-2 mb-4">
-                    <div className="font-semibold text-sm text-gray-600">Time</div>
-                    {daysOfWeek.map(day => (
-                      <div key={day} className="font-semibold text-sm text-gray-600 text-center">
-                        {day.substring(0, 3)}
-                      </div>
-                    ))}
-                  </div>
-                  
-                  {/* Time slots grid */}
-                  {timeSlots.map(time => (
-                    <div key={time} className="grid grid-cols-8 gap-2 mb-2">
-                      <div className="text-sm text-gray-600 flex items-center">
-                        <Clock className="h-3 w-3 mr-1" />
-                        {time}
-                      </div>
-                      {daysOfWeek.map(day => {
-                        const slot = availability.find(s => s.dayOfWeek === day && s.startTime === time)
-                        const slotId = `${day}-${time}`
-                        return (
-                          <button
-                            key={slotId}
-                            onClick={() => toggleAvailability(slotId)}
-                            className={`h-10 rounded-md text-xs font-medium transition-colors cursor-pointer ${
-                              slot?.isAvailable
-                                ? "bg-green-100 text-green-800 hover:bg-green-200"
-                                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                            }`}
-                          >
-                            {slot?.isAvailable ? "Available" : "Unavailable"}
-                          </button>
-                        )
-                      })}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
               <Button 
                 variant="outline" 
-                className="w-full justify-start"
-                onClick={() => {
-                  console.log('Clear All clicked')
-                  const updatedAvailability = availability.map(slot => ({
-                    ...slot,
-                    isAvailable: false
-                  }))
-                  console.log('Cleared availability:', updatedAvailability)
-                  setAvailability(updatedAvailability)
-                }}
+                className="w-full"
+                onClick={() => setAvailabilityPattern(() => false)}
               >
                 <Trash2 className="h-4 w-4 mr-2" />
-                Clear All
+                Clear All Slots
               </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center">
+                <Clock className="h-5 w-5 mr-2 text-blue-600" />
+                Business Hours
+              </CardTitle>
+              <CardDescription>
+                Set standard work hours
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
               <Button 
                 variant="outline" 
-                className="w-full justify-start"
+                className="w-full"
                 onClick={() => {
-                  console.log('Set Business Hours clicked')
                   const workDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
                   const workHours = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00"]
-                  const updatedAvailability = availability.map(slot => ({
-                    ...slot,
-                    isAvailable: workDays.includes(slot.dayOfWeek) && workHours.includes(slot.startTime)
-                  }))
-                  console.log('Business hours availability:', updatedAvailability)
-                  setAvailability(updatedAvailability)
+                  setAvailabilityPattern((day, time) => 
+                    workDays.includes(day) && workHours.includes(time)
+                  )
                 }}
               >
-                <Plus className="h-4 w-4 mr-2" />
+                <Clock className="h-4 w-4 mr-2" />
                 Set Business Hours
               </Button>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center">
+                <Calendar className="h-5 w-5 mr-2 text-green-600" />
+                Full Week
+              </CardTitle>
+              <CardDescription>
+                Available all week
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => {
+                  const workHours = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00"]
+                  setAvailabilityPattern((day, time) => workHours.includes(time))
+                }}
+              >
+                <Calendar className="h-4 w-4 mr-2" />
+                Set Full Week
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center">
+                <Plus className="h-5 w-5 mr-2 text-purple-600" />
+                Extended Hours
+              </CardTitle>
+              <CardDescription>
+                Include evenings
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => {
+                  const workDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+                  const extendedHours = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"]
+                  setAvailabilityPattern((day, time) => 
+                    workDays.includes(day) && extendedHours.includes(time)
+                  )
+                }}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Set Extended Hours
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Current Availability Summary */}
+        <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Calendar className="h-5 w-5 mr-2 text-blue-600" />
+              Current Availability Summary
+            </CardTitle>
+            <CardDescription>
+              Overview of your weekly availability
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {daysOfWeek.map(day => {
+                const daySlots = getAvailableSlotsByDay(day)
+                return (
+                  <div key={day} className="p-4 bg-gray-50 rounded-lg">
+                    <h4 className="font-medium text-gray-900 mb-2">{day}</h4>
+                    <div className="space-y-1">
+                      {daySlots.length > 0 ? (
+                        daySlots.map(slot => (
+                          <div key={slot.id} className="flex items-center text-sm text-green-600">
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            {slot.startTime} - {slot.endTime}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="flex items-center text-sm text-gray-500">
+                          <XCircle className="h-3 w-3 mr-1" />
+                          No availability set
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Statistics */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
             <CardHeader>
               <CardTitle className="text-lg">Statistics</CardTitle>
             </CardHeader>
@@ -335,20 +359,63 @@ export default function TeacherAvailabilityPage() {
                   {availability.length - getAvailableSlotsCount()}
                 </span>
               </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-600">Coverage:</span>
+                <span className="font-medium text-blue-600">
+                  {Math.round((getAvailableSlotsCount() / availability.length) * 100)}%
+                </span>
+              </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
             <CardHeader>
               <CardTitle className="text-lg">Tips</CardTitle>
             </CardHeader>
             <CardContent>
               <ul className="text-sm text-gray-600 space-y-2">
+                <li>• Use quick actions for common patterns</li>
                 <li>• Set realistic availability times</li>
                 <li>• Include breaks between sessions</li>
                 <li>• Update availability weekly</li>
                 <li>• Consider your timezone</li>
               </ul>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
+            <CardHeader>
+              <CardTitle className="text-lg">Next Steps</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => {
+                  const weekendDays = ["Saturday", "Sunday"]
+                  const weekendHours = ["10:00", "11:00", "14:00", "15:00"]
+                  setAvailabilityPattern((day, time) => 
+                    weekendDays.includes(day) && weekendHours.includes(time)
+                  )
+                }}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Weekend Hours
+              </Button>
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => {
+                  const morningHours = ["08:00", "09:00"]
+                  setAvailabilityPattern((day, time) => 
+                    ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].includes(day) && 
+                    morningHours.includes(time)
+                  )
+                }}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Morning Hours
+              </Button>
             </CardContent>
           </Card>
         </div>
