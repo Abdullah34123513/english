@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { UserProfileEditor } from "@/components/user-profile-editor"
 import { 
   User, 
   Mail, 
@@ -27,6 +28,21 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 
+interface UserProfile {
+  id: string
+  email: string
+  name?: string
+  image?: string
+  phone?: string
+  bio?: string
+  location?: string
+  timezone?: string
+  language?: string
+  role: "STUDENT" | "TEACHER" | "ADMIN"
+  createdAt: string
+  updatedAt: string
+}
+
 interface TeacherProfile {
   bio?: string
   experience?: string
@@ -41,6 +57,7 @@ interface TeacherProfile {
 export default function TeacherSettingsPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
   const [profile, setProfile] = useState<TeacherProfile>({})
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -65,16 +82,37 @@ export default function TeacherSettingsPage() {
 
   const fetchProfile = async () => {
     try {
-      const response = await fetch("/api/teacher/profile")
-      if (response.ok) {
-        const data = await response.json()
-        setProfile(data)
+      // Fetch user profile
+      const userResponse = await fetch("/api/user/profile")
+      if (userResponse.ok) {
+        const userData = await userResponse.json()
+        setUserProfile(userData)
+      }
+
+      // Fetch teacher profile
+      const teacherResponse = await fetch("/api/teacher/profile")
+      if (teacherResponse.ok) {
+        const teacherData = await teacherResponse.json()
+        setProfile({
+          bio: teacherData.bio || "",
+          experience: teacherData.experience || "",
+          specialties: teacherData.specialties || [],
+          hourlyRate: teacherData.hourlyRate || 0,
+          country: teacherData.country || "",
+          timezone: teacherData.timezone || "",
+          languages: teacherData.languages || [],
+          availability: teacherData.availability || []
+        })
       }
     } catch (error) {
       console.error("Failed to fetch profile:", error)
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleUserProfileUpdate = (updatedUser: UserProfile) => {
+    setUserProfile(updatedUser)
   }
 
   const saveProfile = async () => {
@@ -85,7 +123,15 @@ export default function TeacherSettingsPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(profile),
+        body: JSON.stringify({
+          bio: profile.bio,
+          hourlyRate: profile.hourlyRate,
+          experience: profile.experience,
+          languages: profile.languages,
+          specialties: profile.specialties,
+          country: profile.country,
+          timezone: profile.timezone,
+        }),
       })
 
       if (response.ok) {
@@ -175,12 +221,22 @@ export default function TeacherSettingsPage() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Tabs defaultValue="basic" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+        <Tabs defaultValue="profile" className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="basic">Basic Info</TabsTrigger>
             <TabsTrigger value="teaching">Teaching</TabsTrigger>
             <TabsTrigger value="availability">Availability</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="profile" className="space-y-6">
+            {userProfile && (
+              <UserProfileEditor 
+                user={userProfile} 
+                onUpdate={handleUserProfileUpdate}
+              />
+            )}
+          </TabsContent>
 
           <TabsContent value="basic" className="space-y-6">
             <Card>

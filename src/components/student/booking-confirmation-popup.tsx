@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { ValidationError, FunctionError, handleUnknownError } from "@/lib/custom-error"
 import { createLogger } from "@/lib/logger"
@@ -69,6 +70,14 @@ interface BookingConfirmationPopupProps {
     duration: number
     price: number
     studentId: string
+  }
+  userData: {
+    id: string
+    name?: string
+    email: string
+    image?: string
+    phone?: string
+    location?: string
   }
   onConfirm: (paymentInfo: PaymentInfo) => void
 }
@@ -175,6 +184,7 @@ export function BookingConfirmationPopup({
   isOpen, 
   onClose, 
   bookingData, 
+  userData,
   onConfirm 
 }: BookingConfirmationPopupProps) {
   const [activeTab, setActiveTab] = useState("instructions")
@@ -455,6 +465,14 @@ export function BookingConfirmationPopup({
     return 100
   }
 
+  const getUserInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map(word => word.charAt(0).toUpperCase())
+      .join("")
+      .substring(0, 2)
+  }
+
   const toggleBankExpansion = (bankName: string) => {
     setExpandedBank(expandedBank === bankName ? null : bankName)
   }
@@ -664,6 +682,44 @@ export function BookingConfirmationPopup({
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6 flex-1 overflow-y-auto custom-scrollbar">
+                {/* Student Profile */}
+                <div className="bg-gradient-to-r from-indigo-50 to-blue-50 p-3 sm:p-4 rounded-xl hover:shadow-md transition-all duration-300 cursor-pointer group">
+                  <div className="flex items-center space-x-3 sm:space-x-4">
+                    <Avatar className="h-12 w-12 sm:h-14 sm:w-14 border-2 border-white shadow-md">
+                      <AvatarImage src={userData.image} alt="Student" />
+                      <AvatarFallback className="bg-gradient-to-br from-indigo-600 to-blue-600 text-white font-semibold">
+                        {getUserInitials(userData.name || "S")}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs sm:text-sm font-medium text-gray-600">Student</p>
+                      <p className="text-base sm:text-lg font-semibold text-gray-900 truncate group-hover:text-indigo-600 transition-colors duration-300">
+                        {userData.name || "Student"}
+                      </p>
+                      <p className="text-xs sm:text-sm text-gray-500 truncate group-hover:text-indigo-600 transition-colors duration-300">
+                        {userData.email}
+                      </p>
+                      {(userData.phone || userData.location) && (
+                        <div className="flex items-center space-x-2 mt-1">
+                          {userData.phone && (
+                            <span className="text-xs text-gray-500 bg-white/50 px-2 py-1 rounded-full">
+                              {userData.phone}
+                            </span>
+                          )}
+                          {userData.location && (
+                            <span className="text-xs text-gray-500 bg-white/50 px-2 py-1 rounded-full">
+                              {userData.location}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    <div className="bg-indigo-100 p-2 rounded-lg">
+                      <User className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-600" />
+                    </div>
+                  </div>
+                </div>
+
                 {/* Teacher Info */}
                 <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-3 sm:p-4 rounded-xl hover:shadow-md transition-all duration-300 cursor-pointer group">
                   <div className="flex items-center space-x-3 sm:space-x-4">

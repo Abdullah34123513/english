@@ -41,6 +41,11 @@ model User {
   image     String?
   password  String?
   role      UserRole @default(STUDENT)
+  phone     String?  // Phone number
+  bio       String?  // Short bio/about me
+  location  String?  // Location/Country
+  timezone  String?  // User's timezone
+  language  String?  // Preferred language
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

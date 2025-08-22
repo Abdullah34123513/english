@@ -14,6 +14,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Loader2, Plus, X, Settings, User, BookOpen, Target, Calendar, Clock, Save } from "lucide-react"
+import { UserProfileEditor } from "@/components/user-profile-editor"
 
 const DAYS_OF_WEEK = [
   { value: 0, label: "Sunday" },
@@ -90,6 +91,7 @@ export default function StudentSettings() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
+  const [userData, setUserData] = useState<any>(null)
   const [profileData, setProfileData] = useState<StudentProfileData>({
     age: "",
     country: "",
@@ -127,6 +129,14 @@ export default function StudentSettings() {
 
   const fetchProfileData = async () => {
     try {
+      // Fetch user profile data
+      const userResponse = await fetch(`/api/user/profile`)
+      if (userResponse.ok) {
+        const userData = await userResponse.json()
+        setUserData(userData)
+      }
+
+      // Fetch student-specific profile data
       const response = await fetch(`/api/student/profile`)
       if (response.ok) {
         const data = await response.json()
@@ -158,6 +168,12 @@ export default function StudentSettings() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleUserProfileUpdate = (updatedUser: any) => {
+    setUserData(updatedUser)
+    setSuccess("User profile updated successfully!")
+    setTimeout(() => setSuccess(""), 3000)
   }
 
   const toggleLearningGoal = (goal: string) => {
@@ -310,13 +326,23 @@ export default function StudentSettings() {
           </Alert>
         )}
 
-        <Tabs defaultValue="basic" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+        <Tabs defaultValue="profile" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="basic">Basic Info</TabsTrigger>
             <TabsTrigger value="learning">Learning</TabsTrigger>
             <TabsTrigger value="preferences">Preferences</TabsTrigger>
             <TabsTrigger value="schedule">Schedule</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="profile">
+            {userData && (
+              <UserProfileEditor 
+                user={userData} 
+                onUpdate={handleUserProfileUpdate}
+              />
+            )}
+          </TabsContent>
 
           <TabsContent value="basic">
             <Card>

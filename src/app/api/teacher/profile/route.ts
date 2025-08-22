@@ -81,7 +81,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { bio, hourlyRate, experience, education, languages } = await request.json()
+    const { bio, hourlyRate, experience, education, languages, specialties, country, timezone } = await request.json()
 
     const teacher = await db.teacher.update({
       where: { userId: session.user.id },
@@ -91,8 +91,20 @@ export async function PUT(request: NextRequest) {
         experience,
         education,
         languages,
+        specializations: specialties,
       }
     })
+
+    // Also update user profile if country or timezone is provided
+    if (country || timezone) {
+      await db.user.update({
+        where: { id: session.user.id },
+        data: {
+          ...(country && { location: country }),
+          ...(timezone && { timezone }),
+        }
+      })
+    }
 
     return NextResponse.json(teacher)
   } catch (error) {
