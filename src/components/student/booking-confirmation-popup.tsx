@@ -769,7 +769,7 @@ export function BookingConfirmationPopup({
           {/* Payment Instructions and Form */}
           <div className="lg:col-span-3">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-              <TabsList className="grid w-full grid-cols-2 bg-white/80 backdrop-blur-sm p-1 rounded-xl">
+              <TabsList className="grid w-full grid-cols-2 bg-white/80 backdrop-blur-sm p-1 rounded-xl flex-shrink-0">
                 <TabsTrigger 
                   value="instructions" 
                   className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-lg transition-all duration-200 text-xs sm:text-sm hover:bg-gray-100"
@@ -788,8 +788,8 @@ export function BookingConfirmationPopup({
                 </TabsTrigger>
               </TabsList>
 
-              <div className="flex-1">
-                <TabsContent value="instructions" className="space-y-4 sm:space-y-6 p-4 sm:p-6 h-full overflow-y-auto pb-20 custom-scrollbar">
+              <div className="flex-1 overflow-hidden">
+                <TabsContent value="instructions" className="space-y-4 sm:space-y-6 p-4 sm:p-6 overflow-y-auto pb-20 custom-scrollbar" style={{ maxHeight: 'calc(90vh - 300px)' }}>
                   <Alert className="border-blue-200 bg-blue-50 hover:shadow-md transition-all duration-300">
                     <AlertCircle className="h-4 w-4 text-blue-600" />
                     <AlertDescription className="text-blue-800 text-sm">
@@ -1059,7 +1059,7 @@ export function BookingConfirmationPopup({
                   </Button>
                 </TabsContent>
 
-                <TabsContent value="payment" className="space-y-4 sm:space-y-6 p-4 sm:p-6 h-full overflow-y-auto pb-32 custom-scrollbar">
+                <TabsContent value="payment" className="space-y-4 sm:space-y-6 p-4 sm:p-6 overflow-y-auto pb-32 custom-scrollbar" style={{ maxHeight: 'calc(90vh - 300px)' }}>
                   <Alert className="border-green-200 bg-green-50 hover:shadow-md transition-all duration-300">
                     <AlertCircle className="h-4 w-4 text-green-600" />
                     <AlertDescription className="text-green-800 text-sm">
