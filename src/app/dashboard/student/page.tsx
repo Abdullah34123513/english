@@ -53,10 +53,42 @@ export default function StudentDashboard() {
       const response = await fetch(`/api/student/profile`)
       if (response.ok) {
         const data = await response.json()
-        setStudentData(data)
+        // Ensure statistics object exists with default values
+        const studentDataWithStats = {
+          ...data,
+          statistics: data.statistics || {
+            totalClasses: 0,
+            upcomingClasses: 0,
+            moneySpent: 0,
+            learningStreak: 0
+          }
+        }
+        setStudentData(studentDataWithStats)
+      } else {
+        // Handle error response
+        console.error("Failed to fetch student data:", response.status)
+        setStudentData({
+          bookings: [],
+          statistics: {
+            totalClasses: 0,
+            upcomingClasses: 0,
+            moneySpent: 0,
+            learningStreak: 0
+          }
+        })
       }
     } catch (error) {
       console.error("Error fetching student data:", error)
+      // Set default data with empty statistics
+      setStudentData({
+        bookings: [],
+        statistics: {
+          totalClasses: 0,
+          upcomingClasses: 0,
+          moneySpent: 0,
+          learningStreak: 0
+        }
+      })
     } finally {
       setLoading(false)
     }
@@ -132,7 +164,7 @@ export default function StudentDashboard() {
               <div className="hidden md:block">
                 <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-6">
                   <div className="text-center">
-                    <div className="text-4xl font-bold mb-1">0</div>
+                    <div className="text-4xl font-bold mb-1">{studentData?.statistics?.upcomingClasses || 0}</div>
                     <div className="text-sm text-white/80">Classes This Week</div>
                   </div>
                 </div>
@@ -151,10 +183,10 @@ export default function StudentDashboard() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-blue-600">0</div>
+              <div className="text-2xl font-bold text-blue-600">{studentData?.statistics?.totalClasses || 0}</div>
               <p className="text-xs text-gray-600">Completed</p>
               <div className="mt-2 h-1 bg-blue-200 rounded-full overflow-hidden">
-                <div className="h-full bg-blue-600 w-0 rounded-full transition-all duration-500"></div>
+                <div className="h-full bg-blue-600 rounded-full transition-all duration-500" style={{ width: `${Math.min((studentData?.statistics?.totalClasses || 0) * 10, 100)}%` }}></div>
               </div>
             </CardContent>
           </Card>
@@ -167,10 +199,10 @@ export default function StudentDashboard() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-purple-600">0</div>
+              <div className="text-2xl font-bold text-purple-600">{studentData?.statistics?.upcomingClasses || 0}</div>
               <p className="text-xs text-gray-600">Scheduled</p>
               <div className="mt-2 h-1 bg-purple-200 rounded-full overflow-hidden">
-                <div className="h-full bg-purple-600 w-0 rounded-full transition-all duration-500"></div>
+                <div className="h-full bg-purple-600 rounded-full transition-all duration-500" style={{ width: `${Math.min((studentData?.statistics?.upcomingClasses || 0) * 25, 100)}%` }}></div>
               </div>
             </CardContent>
           </Card>
@@ -183,10 +215,10 @@ export default function StudentDashboard() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">$0</div>
+              <div className="text-2xl font-bold text-green-600">${studentData?.statistics?.moneySpent?.toFixed(2) || '0.00'}</div>
               <p className="text-xs text-gray-600">Total Investment</p>
               <div className="mt-2 h-1 bg-green-200 rounded-full overflow-hidden">
-                <div className="h-full bg-green-600 w-0 rounded-full transition-all duration-500"></div>
+                <div className="h-full bg-green-600 rounded-full transition-all duration-500" style={{ width: `${Math.min((studentData?.statistics?.moneySpent || 0) / 10, 100)}%` }}></div>
               </div>
             </CardContent>
           </Card>
@@ -199,10 +231,10 @@ export default function StudentDashboard() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-pink-600">0</div>
+              <div className="text-2xl font-bold text-pink-600">{studentData?.statistics?.learningStreak || 0}</div>
               <p className="text-xs text-gray-600">Days Active</p>
               <div className="mt-2 h-1 bg-pink-200 rounded-full overflow-hidden">
-                <div className="h-full bg-pink-600 w-0 rounded-full transition-all duration-500"></div>
+                <div className="h-full bg-pink-600 rounded-full transition-all duration-500" style={{ width: `${Math.min((studentData?.statistics?.learningStreak || 0) * 10, 100)}%` }}></div>
               </div>
             </CardContent>
           </Card>
