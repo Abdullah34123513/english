@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Calendar, Clock, User, Video, Star, MessageCircle, X } from "lucide-react"
+import { ReviewDialog } from "./review-dialog"
 
 interface BookingListProps {
   studentData: any
@@ -40,10 +41,6 @@ export function BookingList({ studentData, onUpdate }: BookingListProps) {
   const [error, setError] = useState("")
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null)
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false)
-  const [reviewForm, setReviewForm] = useState({
-    rating: 5,
-    comment: "",
-  })
 
   useEffect(() => {
     fetchBookings()
@@ -93,7 +90,7 @@ export function BookingList({ studentData, onUpdate }: BookingListProps) {
     }
   }
 
-  const handleSubmitReview = async () => {
+  const handleSubmitReview = async (reviewData: { rating: number; comment: string }) => {
     if (!selectedBooking) return
 
     try {
@@ -102,12 +99,11 @@ export function BookingList({ studentData, onUpdate }: BookingListProps) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(reviewForm),
+        body: JSON.stringify(reviewData),
       })
 
       if (response.ok) {
         setReviewDialogOpen(false)
-        setReviewForm({ rating: 5, comment: "" })
         setSelectedBooking(null)
         fetchBookings()
         onUpdate()
@@ -344,51 +340,17 @@ export function BookingList({ studentData, onUpdate }: BookingListProps) {
 
       {/* Review Dialog */}
       {selectedBooking && (
-        <div className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 ${reviewDialogOpen ? '' : 'hidden'}`}>
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold mb-4">Review Your Class</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              How was your class with {selectedBooking.teacher.user.name}?
-            </p>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Rating</label>
-                <div className="flex space-x-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      onClick={() => setReviewForm(prev => ({ ...prev, rating: star }))}
-                      className="text-2xl focus:outline-none"
-                    >
-                      {star <= reviewForm.rating ? "⭐" : "☆"}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-2">Comment (Optional)</label>
-                <textarea
-                  className="w-full p-2 border rounded-md resize-none"
-                  rows={3}
-                  placeholder="Share your experience..."
-                  value={reviewForm.comment}
-                  onChange={(e) => setReviewForm(prev => ({ ...prev, comment: e.target.value }))}
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-end space-x-2 mt-6">
-              <Button variant="outline" onClick={() => setReviewDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleSubmitReview}>
-                Submit Review
-              </Button>
-            </div>
-          </div>
-        </div>
+        <ReviewDialog
+          isOpen={reviewDialogOpen}
+          onClose={() => {
+            setReviewDialogOpen(false)
+            setSelectedBooking(null)
+          }}
+          teacher={selectedBooking.teacher.user}
+          bookingId={selectedBooking.id}
+          completedAt={selectedBooking.startTime}
+          onSubmit={handleSubmitReview}
+        />
       )}
     </div>
   )
