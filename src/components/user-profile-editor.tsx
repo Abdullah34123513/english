@@ -53,6 +53,10 @@ const TIMEZONES = [
   "UTC-12:00", "UTC-11:00", "UTC-10:00", "UTC-09:30", "UTC-09:00", "UTC-08:00", "UTC-07:00", "UTC-06:00", "UTC-05:00", "UTC-04:00", "UTC-03:30", "UTC-03:00", "UTC-02:00", "UTC-01:00", "UTC+00:00", "UTC+01:00", "UTC+02:00", "UTC+03:00", "UTC+03:30", "UTC+04:00", "UTC+04:30", "UTC+05:00", "UTC+05:30", "UTC+05:45", "UTC+06:00", "UTC+06:30", "UTC+07:00", "UTC+08:00", "UTC+08:45", "UTC+09:00", "UTC+09:30", "UTC+10:00", "UTC+10:30", "UTC+11:00", "UTC+12:00", "UTC+12:45", "UTC+13:00", "UTC+14:00"
 ]
 
+const COUNTRIES = [
+  "United States", "Canada", "United Kingdom", "Australia", "Germany", "France", "Italy", "Spain", "Netherlands", "Sweden", "Norway", "Denmark", "Finland", "Switzerland", "Austria", "Belgium", "Ireland", "Portugal", "Greece", "Poland", "Czech Republic", "Hungary", "Romania", "Bulgaria", "Croatia", "Serbia", "Slovenia", "Slovakia", "Estonia", "Latvia", "Lithuania", "Malta", "Cyprus", "Luxembourg", "Iceland", "Japan", "China", "South Korea", "India", "Singapore", "Malaysia", "Thailand", "Indonesia", "Philippines", "Vietnam", "Taiwan", "Hong Kong", "New Zealand", "Brazil", "Argentina", "Mexico", "Chile", "Colombia", "Peru", "Venezuela", "Ecuador", "Bolivia", "Paraguay", "Uruguay", "Costa Rica", "Panama", "Guatemala", "El Salvador", "Honduras", "Nicaragua", "Cuba", "Dominican Republic", "Puerto Rico", "Jamaica", "Trinidad and Tobago", "Barbados", "Bahamas", "South Africa", "Egypt", "Nigeria", "Kenya", "Morocco", "Tunisia", "Algeria", "Ghana", "Uganda", "Tanzania", "Ethiopia", "Zimbabwe", "Zambia", "Botswana", "Namibia", "Mozambique", "Angola", "Senegal", "Ivory Coast", "Cameroon", "Mali", "Burkina Faso", "Niger", "Chad", "Sudan", "Libya", "Madagascar", "Mauritius", "Seychelles", "Rwanda", "Burundi", "Malawi", "Lesotho", "Eswatini", "Gambia", "Guinea", "Sierra Leone", "Liberia", "Togo", "Benin", "Central African Republic", "Republic of the Congo", "Democratic Republic of the Congo", "Gabon", "Equatorial Guinea", "São Tomé and Príncipe", "Cape Verde", "Comoros", "Mauritania", "Western Sahara", "Somalia", "Djibouti", "Eritrea", "South Sudan", "Israel", "Saudi Arabia", "United Arab Emirates", "Qatar", "Kuwait", "Bahrain", "Oman", "Yemen", "Jordan", "Lebanon", "Syria", "Iraq", "Iran", "Turkey", "Cyprus", "Georgia", "Armenia", "Azerbaijan", "Kazakhstan", "Uzbekistan", "Turkmenistan", "Tajikistan", "Kyrgyzstan", "Afghanistan", "Pakistan", "Bangladesh", "Sri Lanka", "Nepal", "Bhutan", "Maldives", "Myanmar", "Laos", "Cambodia", "Vietnam", "Brunei", "East Timor", "Papua New Guinea", "Fiji", "Solomon Islands", "Vanuatu", "Samoa", "Tonga", "Kiribati", "Tuvalu", "Nauru", "Palau", "Federated States of Micronesia", "Marshall Islands", "Russia", "Ukraine", "Belarus", "Moldova", "Estonia", "Latvia", "Lithuania", "Poland", "Czech Republic", "Slovakia", "Hungary", "Romania", "Bulgaria", "Slovenia", "Croatia", "Bosnia and Herzegovina", "Montenegro", "Serbia", "Kosovo", "North Macedonia", "Albania", "Greece", "Malta", "Andorra", "Monaco", "San Marino", "Vatican City", "Liechtenstein"
+]
+
 const LANGUAGES = [
   "English", "Spanish", "French", "German", "Italian", "Portuguese", "Russian", "Chinese", "Japanese", "Korean", "Arabic", "Hindi", "Turkish", "Dutch", "Swedish", "Norwegian", "Danish", "Finnish", "Polish", "Czech", "Hungarian", "Greek", "Hebrew", "Thai", "Vietnamese", "Indonesian", "Malay", "Filipino", "Bengali", "Urdu", "Persian", "Swahili"
 ]
@@ -442,14 +446,20 @@ export function UserProfileEditor({ user, onUpdate }: UserProfileEditorProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="location">Location</Label>
+              <Label htmlFor="location">Country</Label>
               {isEditing ? (
-                <Input
-                  id="location"
-                  value={formData.location}
-                  onChange={(e) => handleChange("location", e.target.value)}
-                  placeholder="City, Country"
-                />
+                <Select value={formData.location} onValueChange={(value) => handleChange("location", value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select country" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {COUNTRIES.map((country) => (
+                      <SelectItem key={country} value={country}>
+                        {country}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               ) : (
                 <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded-md">
                   <MapPin className="h-4 w-4 text-gray-500" />

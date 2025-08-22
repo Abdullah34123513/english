@@ -764,7 +764,7 @@ export default function ProfilePage() {
           {/* Right Column - Detailed Info */}
           <div className="lg:col-span-2">
             <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="grid w-full grid-cols-4 bg-white/80 backdrop-blur-sm p-1 rounded-lg shadow-md">
+              <TabsList className="grid w-full grid-cols-5 bg-white/80 backdrop-blur-sm p-1 rounded-lg shadow-md">
                 <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
                   Overview
                 </TabsTrigger>
@@ -773,6 +773,9 @@ export default function ProfilePage() {
                 </TabsTrigger>
                 <TabsTrigger value="preferences" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
                   Preferences
+                </TabsTrigger>
+                <TabsTrigger value="settings" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                  Settings
                 </TabsTrigger>
                 <TabsTrigger value="achievements" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
                   Achievements
@@ -1179,6 +1182,814 @@ export default function ProfilePage() {
                       </Card>
                     )}
                   </>
+                )}
+              </TabsContent>
+
+              <TabsContent value="settings" className="space-y-6">
+                {/* Account Settings */}
+                <Card className="bg-white/80 backdrop-blur-sm shadow-xl border-0">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <User className="h-5 w-5" />
+                      <span>Account Settings</span>
+                    </CardTitle>
+                    <CardDescription>
+                      Manage your basic account information
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <Label htmlFor="settings-name">Full Name</Label>
+                        {isEditing ? (
+                          <Input
+                            id="settings-name"
+                            value={editForm.name || ""}
+                            onChange={(e) => handleFormChange("name", e.target.value)}
+                            placeholder="Enter your full name"
+                          />
+                        ) : (
+                          <div className="p-3 bg-gray-50 rounded-md">
+                            <span className="text-sm font-medium">{profile.name}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="settings-email">Email Address</Label>
+                        <div className="p-3 bg-gray-50 rounded-md">
+                          <span className="text-sm font-medium">{profile.email}</span>
+                          <Badge variant="secondary" className="ml-2 text-xs">Verified</Badge>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <Label htmlFor="settings-phone">Phone Number</Label>
+                        {isEditing ? (
+                          <Input
+                            id="settings-phone"
+                            type="tel"
+                            value={editForm.phone || ""}
+                            onChange={(e) => handleFormChange("phone", e.target.value)}
+                            placeholder="+1 (555) 123-4567"
+                          />
+                        ) : (
+                          <div className="p-3 bg-gray-50 rounded-md">
+                            <span className="text-sm">{profile.phone || "Not specified"}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {isStudent && (
+                        <div className="space-y-2">
+                          <Label htmlFor="settings-age">Age</Label>
+                          {isEditing ? (
+                            <Input
+                              id="settings-age"
+                              type="number"
+                              value={editForm.age || ""}
+                              onChange={(e) => handleFormChange("age", parseInt(e.target.value))}
+                              placeholder="Enter your age"
+                            />
+                          ) : (
+                            <div className="p-3 bg-gray-50 rounded-md">
+                              <span className="text-sm">{profile.age ? `${profile.age} years old` : "Not specified"}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Location & Time Settings */}
+                <Card className="bg-white/80 backdrop-blur-sm shadow-xl border-0">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Globe className="h-5 w-5" />
+                      <span>Location & Time Settings</span>
+                    </CardTitle>
+                    <CardDescription>
+                      Configure your location and timezone preferences
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <Label htmlFor="settings-country">Country</Label>
+                        {isEditing ? (
+                          <Select value={editForm.country || ""} onValueChange={(value) => handleFormChange("country", value)}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select country" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="United States">United States</SelectItem>
+                              <SelectItem value="Canada">Canada</SelectItem>
+                              <SelectItem value="United Kingdom">United Kingdom</SelectItem>
+                              <SelectItem value="Australia">Australia</SelectItem>
+                              <SelectItem value="Germany">Germany</SelectItem>
+                              <SelectItem value="France">France</SelectItem>
+                              <SelectItem value="Italy">Italy</SelectItem>
+                              <SelectItem value="Spain">Spain</SelectItem>
+                              <SelectItem value="Japan">Japan</SelectItem>
+                              <SelectItem value="China">China</SelectItem>
+                              <SelectItem value="India">India</SelectItem>
+                              <SelectItem value="Brazil">Brazil</SelectItem>
+                              <SelectItem value="Mexico">Mexico</SelectItem>
+                              <SelectItem value="South Korea">South Korea</SelectItem>
+                              <SelectItem value="Netherlands">Netherlands</SelectItem>
+                              <SelectItem value="Sweden">Sweden</SelectItem>
+                              <SelectItem value="Norway">Norway</SelectItem>
+                              <SelectItem value="Denmark">Denmark</SelectItem>
+                              <SelectItem value="Finland">Finland</SelectItem>
+                              <SelectItem value="Switzerland">Switzerland</SelectItem>
+                              <SelectItem value="Austria">Austria</SelectItem>
+                              <SelectItem value="Belgium">Belgium</SelectItem>
+                              <SelectItem value="Ireland">Ireland</SelectItem>
+                              <SelectItem value="Portugal">Portugal</SelectItem>
+                              <SelectItem value="Greece">Greece</SelectItem>
+                              <SelectItem value="Poland">Poland</SelectItem>
+                              <SelectItem value="Czech Republic">Czech Republic</SelectItem>
+                              <SelectItem value="Hungary">Hungary</SelectItem>
+                              <SelectItem value="Romania">Romania</SelectItem>
+                              <SelectItem value="Bulgaria">Bulgaria</SelectItem>
+                              <SelectItem value="Croatia">Croatia</SelectItem>
+                              <SelectItem value="Serbia">Serbia</SelectItem>
+                              <SelectItem value="Slovenia">Slovenia</SelectItem>
+                              <SelectItem value="Slovakia">Slovakia</SelectItem>
+                              <SelectItem value="Estonia">Estonia</SelectItem>
+                              <SelectItem value="Latvia">Latvia</SelectItem>
+                              <SelectItem value="Lithuania">Lithuania</SelectItem>
+                              <SelectItem value="Malta">Malta</SelectItem>
+                              <SelectItem value="Cyprus">Cyprus</SelectItem>
+                              <SelectItem value="Luxembourg">Luxembourg</SelectItem>
+                              <SelectItem value="Iceland">Iceland</SelectItem>
+                              <SelectItem value="Singapore">Singapore</SelectItem>
+                              <SelectItem value="Malaysia">Malaysia</SelectItem>
+                              <SelectItem value="Thailand">Thailand</SelectItem>
+                              <SelectItem value="Indonesia">Indonesia</SelectItem>
+                              <SelectItem value="Philippines">Philippines</SelectItem>
+                              <SelectItem value="Vietnam">Vietnam</SelectItem>
+                              <SelectItem value="Taiwan">Taiwan</SelectItem>
+                              <SelectItem value="Hong Kong">Hong Kong</SelectItem>
+                              <SelectItem value="New Zealand">New Zealand</SelectItem>
+                              <SelectItem value="Argentina">Argentina</SelectItem>
+                              <SelectItem value="Chile">Chile</SelectItem>
+                              <SelectItem value="Colombia">Colombia</SelectItem>
+                              <SelectItem value="Peru">Peru</SelectItem>
+                              <SelectItem value="Venezuela">Venezuela</SelectItem>
+                              <SelectItem value="Ecuador">Ecuador</SelectItem>
+                              <SelectItem value="Bolivia">Bolivia</SelectItem>
+                              <SelectItem value="Paraguay">Paraguay</SelectItem>
+                              <SelectItem value="Uruguay">Uruguay</SelectItem>
+                              <SelectItem value="Costa Rica">Costa Rica</SelectItem>
+                              <SelectItem value="Panama">Panama</SelectItem>
+                              <SelectItem value="Guatemala">Guatemala</SelectItem>
+                              <SelectItem value="El Salvador">El Salvador</SelectItem>
+                              <SelectItem value="Honduras">Honduras</SelectItem>
+                              <SelectItem value="Nicaragua">Nicaragua</SelectItem>
+                              <SelectItem value="Cuba">Cuba</SelectItem>
+                              <SelectItem value="Dominican Republic">Dominican Republic</SelectItem>
+                              <SelectItem value="Puerto Rico">Puerto Rico</SelectItem>
+                              <SelectItem value="Jamaica">Jamaica</SelectItem>
+                              <SelectItem value="Trinidad and Tobago">Trinidad and Tobago</SelectItem>
+                              <SelectItem value="Barbados">Barbados</SelectItem>
+                              <SelectItem value="Bahamas">Bahamas</SelectItem>
+                              <SelectItem value="South Africa">South Africa</SelectItem>
+                              <SelectItem value="Egypt">Egypt</SelectItem>
+                              <SelectItem value="Nigeria">Nigeria</SelectItem>
+                              <SelectItem value="Kenya">Kenya</SelectItem>
+                              <SelectItem value="Morocco">Morocco</SelectItem>
+                              <SelectItem value="Tunisia">Tunisia</SelectItem>
+                              <SelectItem value="Algeria">Algeria</SelectItem>
+                              <SelectItem value="Ghana">Ghana</SelectItem>
+                              <SelectItem value="Uganda">Uganda</SelectItem>
+                              <SelectItem value="Tanzania">Tanzania</SelectItem>
+                              <SelectItem value="Ethiopia">Ethiopia</SelectItem>
+                              <SelectItem value="Zimbabwe">Zimbabwe</SelectItem>
+                              <SelectItem value="Zambia">Zambia</SelectItem>
+                              <SelectItem value="Botswana">Botswana</SelectItem>
+                              <SelectItem value="Namibia">Namibia</SelectItem>
+                              <SelectItem value="Mozambique">Mozambique</SelectItem>
+                              <SelectItem value="Angola">Angola</SelectItem>
+                              <SelectItem value="Senegal">Senegal</SelectItem>
+                              <SelectItem value="Ivory Coast">Ivory Coast</SelectItem>
+                              <SelectItem value="Cameroon">Cameroon</SelectItem>
+                              <SelectItem value="Mali">Mali</SelectItem>
+                              <SelectItem value="Burkina Faso">Burkina Faso</SelectItem>
+                              <SelectItem value="Niger">Niger</SelectItem>
+                              <SelectItem value="Chad">Chad</SelectItem>
+                              <SelectItem value="Sudan">Sudan</SelectItem>
+                              <SelectItem value="Libya">Libya</SelectItem>
+                              <SelectItem value="Madagascar">Madagascar</SelectItem>
+                              <SelectItem value="Mauritius">Mauritius</SelectItem>
+                              <SelectItem value="Seychelles">Seychelles</SelectItem>
+                              <SelectItem value="Rwanda">Rwanda</SelectItem>
+                              <SelectItem value="Burundi">Burundi</SelectItem>
+                              <SelectItem value="Malawi">Malawi</SelectItem>
+                              <SelectItem value="Lesotho">Lesotho</SelectItem>
+                              <SelectItem value="Eswatini">Eswatini</SelectItem>
+                              <SelectItem value="Gambia">Gambia</SelectItem>
+                              <SelectItem value="Guinea">Guinea</SelectItem>
+                              <SelectItem value="Sierra Leone">Sierra Leone</SelectItem>
+                              <SelectItem value="Liberia">Liberia</SelectItem>
+                              <SelectItem value="Togo">Togo</SelectItem>
+                              <SelectItem value="Benin">Benin</SelectItem>
+                              <SelectItem value="Central African Republic">Central African Republic</SelectItem>
+                              <SelectItem value="Republic of the Congo">Republic of the Congo</SelectItem>
+                              <SelectItem value="Democratic Republic of the Congo">Democratic Republic of the Congo</SelectItem>
+                              <SelectItem value="Gabon">Gabon</SelectItem>
+                              <SelectItem value="Equatorial Guinea">Equatorial Guinea</SelectItem>
+                              <SelectItem value="São Tomé and Príncipe">São Tomé and Príncipe</SelectItem>
+                              <SelectItem value="Cape Verde">Cape Verde</SelectItem>
+                              <SelectItem value="Comoros">Comoros</SelectItem>
+                              <SelectItem value="Mauritania">Mauritania</SelectItem>
+                              <SelectItem value="Western Sahara">Western Sahara</SelectItem>
+                              <SelectItem value="Somalia">Somalia</SelectItem>
+                              <SelectItem value="Djibouti">Djibouti</SelectItem>
+                              <SelectItem value="Eritrea">Eritrea</SelectItem>
+                              <SelectItem value="South Sudan">South Sudan</SelectItem>
+                              <SelectItem value="Israel">Israel</SelectItem>
+                              <SelectItem value="Saudi Arabia">Saudi Arabia</SelectItem>
+                              <SelectItem value="United Arab Emirates">United Arab Emirates</SelectItem>
+                              <SelectItem value="Qatar">Qatar</SelectItem>
+                              <SelectItem value="Kuwait">Kuwait</SelectItem>
+                              <SelectItem value="Bahrain">Bahrain</SelectItem>
+                              <SelectItem value="Oman">Oman</SelectItem>
+                              <SelectItem value="Yemen">Yemen</SelectItem>
+                              <SelectItem value="Jordan">Jordan</SelectItem>
+                              <SelectItem value="Lebanon">Lebanon</SelectItem>
+                              <SelectItem value="Syria">Syria</SelectItem>
+                              <SelectItem value="Iraq">Iraq</SelectItem>
+                              <SelectItem value="Iran">Iran</SelectItem>
+                              <SelectItem value="Turkey">Turkey</SelectItem>
+                              <SelectItem value="Georgia">Georgia</SelectItem>
+                              <SelectItem value="Armenia">Armenia</SelectItem>
+                              <SelectItem value="Azerbaijan">Azerbaijan</SelectItem>
+                              <SelectItem value="Kazakhstan">Kazakhstan</SelectItem>
+                              <SelectItem value="Uzbekistan">Uzbekistan</SelectItem>
+                              <SelectItem value="Turkmenistan">Turkmenistan</SelectItem>
+                              <SelectItem value="Tajikistan">Tajikistan</SelectItem>
+                              <SelectItem value="Kyrgyzstan">Kyrgyzstan</SelectItem>
+                              <SelectItem value="Afghanistan">Afghanistan</SelectItem>
+                              <SelectItem value="Pakistan">Pakistan</SelectItem>
+                              <SelectItem value="Bangladesh">Bangladesh</SelectItem>
+                              <SelectItem value="Sri Lanka">Sri Lanka</SelectItem>
+                              <SelectItem value="Nepal">Nepal</SelectItem>
+                              <SelectItem value="Bhutan">Bhutan</SelectItem>
+                              <SelectItem value="Maldives">Maldives</SelectItem>
+                              <SelectItem value="Myanmar">Myanmar</SelectItem>
+                              <SelectItem value="Laos">Laos</SelectItem>
+                              <SelectItem value="Cambodia">Cambodia</SelectItem>
+                              <SelectItem value="Brunei">Brunei</SelectItem>
+                              <SelectItem value="East Timor">East Timor</SelectItem>
+                              <SelectItem value="Papua New Guinea">Papua New Guinea</SelectItem>
+                              <SelectItem value="Fiji">Fiji</SelectItem>
+                              <SelectItem value="Solomon Islands">Solomon Islands</SelectItem>
+                              <SelectItem value="Vanuatu">Vanuatu</SelectItem>
+                              <SelectItem value="Samoa">Samoa</SelectItem>
+                              <SelectItem value="Tonga">Tonga</SelectItem>
+                              <SelectItem value="Kiribati">Kiribati</SelectItem>
+                              <SelectItem value="Tuvalu">Tuvalu</SelectItem>
+                              <SelectItem value="Nauru">Nauru</SelectItem>
+                              <SelectItem value="Palau">Palau</SelectItem>
+                              <SelectItem value="Federated States of Micronesia">Federated States of Micronesia</SelectItem>
+                              <SelectItem value="Marshall Islands">Marshall Islands</SelectItem>
+                              <SelectItem value="Russia">Russia</SelectItem>
+                              <SelectItem value="Ukraine">Ukraine</SelectItem>
+                              <SelectItem value="Belarus">Belarus</SelectItem>
+                              <SelectItem value="Moldova">Moldova</SelectItem>
+                              <SelectItem value="Estonia">Estonia</SelectItem>
+                              <SelectItem value="Latvia">Latvia</SelectItem>
+                              <SelectItem value="Lithuania">Lithuania</SelectItem>
+                              <SelectItem value="Poland">Poland</SelectItem>
+                              <SelectItem value="Czech Republic">Czech Republic</SelectItem>
+                              <SelectItem value="Slovakia">Slovakia</SelectItem>
+                              <SelectItem value="Hungary">Hungary</SelectItem>
+                              <SelectItem value="Romania">Romania</SelectItem>
+                              <SelectItem value="Bulgaria">Bulgaria</SelectItem>
+                              <SelectItem value="Slovenia">Slovenia</SelectItem>
+                              <SelectItem value="Croatia">Croatia</SelectItem>
+                              <SelectItem value="Bosnia and Herzegovina">Bosnia and Herzegovina</SelectItem>
+                              <SelectItem value="Montenegro">Montenegro</SelectItem>
+                              <SelectItem value="Serbia">Serbia</SelectItem>
+                              <SelectItem value="Kosovo">Kosovo</SelectItem>
+                              <SelectItem value="North Macedonia">North Macedonia</SelectItem>
+                              <SelectItem value="Albania">Albania</SelectItem>
+                              <SelectItem value="Greece">Greece</SelectItem>
+                              <SelectItem value="Malta">Malta</SelectItem>
+                              <SelectItem value="Andorra">Andorra</SelectItem>
+                              <SelectItem value="Monaco">Monaco</SelectItem>
+                              <SelectItem value="San Marino">San Marino</SelectItem>
+                              <SelectItem value="Vatican City">Vatican City</SelectItem>
+                              <SelectItem value="Liechtenstein">Liechtenstein</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <div className="p-3 bg-gray-50 rounded-md">
+                            <span className="text-sm">{profile.country || "Not specified"}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="settings-timezone">Timezone</Label>
+                        {isEditing ? (
+                          <Select value={editForm.timezone || ""} onValueChange={(value) => handleFormChange("timezone", value)}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select timezone" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="UTC-12:00">UTC-12:00</SelectItem>
+                              <SelectItem value="UTC-11:00">UTC-11:00</SelectItem>
+                              <SelectItem value="UTC-10:00">UTC-10:00</SelectItem>
+                              <SelectItem value="UTC-09:30">UTC-09:30</SelectItem>
+                              <SelectItem value="UTC-09:00">UTC-09:00</SelectItem>
+                              <SelectItem value="UTC-08:00">UTC-08:00</SelectItem>
+                              <SelectItem value="UTC-07:00">UTC-07:00</SelectItem>
+                              <SelectItem value="UTC-06:00">UTC-06:00</SelectItem>
+                              <SelectItem value="UTC-05:00">UTC-05:00</SelectItem>
+                              <SelectItem value="UTC-04:00">UTC-04:00</SelectItem>
+                              <SelectItem value="UTC-03:30">UTC-03:30</SelectItem>
+                              <SelectItem value="UTC-03:00">UTC-03:00</SelectItem>
+                              <SelectItem value="UTC-02:00">UTC-02:00</SelectItem>
+                              <SelectItem value="UTC-01:00">UTC-01:00</SelectItem>
+                              <SelectItem value="UTC+00:00">UTC+00:00</SelectItem>
+                              <SelectItem value="UTC+01:00">UTC+01:00</SelectItem>
+                              <SelectItem value="UTC+02:00">UTC+02:00</SelectItem>
+                              <SelectItem value="UTC+03:00">UTC+03:00</SelectItem>
+                              <SelectItem value="UTC+03:30">UTC+03:30</SelectItem>
+                              <SelectItem value="UTC+04:00">UTC+04:00</SelectItem>
+                              <SelectItem value="UTC+04:30">UTC+04:30</SelectItem>
+                              <SelectItem value="UTC+05:00">UTC+05:00</SelectItem>
+                              <SelectItem value="UTC+05:30">UTC+05:30</SelectItem>
+                              <SelectItem value="UTC+05:45">UTC+05:45</SelectItem>
+                              <SelectItem value="UTC+06:00">UTC+06:00</SelectItem>
+                              <SelectItem value="UTC+06:30">UTC+06:30</SelectItem>
+                              <SelectItem value="UTC+07:00">UTC+07:00</SelectItem>
+                              <SelectItem value="UTC+08:00">UTC+08:00</SelectItem>
+                              <SelectItem value="UTC+08:45">UTC+08:45</SelectItem>
+                              <SelectItem value="UTC+09:00">UTC+09:00</SelectItem>
+                              <SelectItem value="UTC+09:30">UTC+09:30</SelectItem>
+                              <SelectItem value="UTC+10:00">UTC+10:00</SelectItem>
+                              <SelectItem value="UTC+10:30">UTC+10:30</SelectItem>
+                              <SelectItem value="UTC+11:00">UTC+11:00</SelectItem>
+                              <SelectItem value="UTC+12:00">UTC+12:00</SelectItem>
+                              <SelectItem value="UTC+12:45">UTC+12:45</SelectItem>
+                              <SelectItem value="UTC+13:00">UTC+13:00</SelectItem>
+                              <SelectItem value="UTC+14:00">UTC+14:00</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <div className="p-3 bg-gray-50 rounded-md">
+                            <span className="text-sm">{profile.timezone || "Not specified"}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Learning & Study Settings */}
+                {isStudent && (
+                  <Card className="bg-white/80 backdrop-blur-sm shadow-xl border-0">
+                    <CardHeader>
+                      <CardTitle className="flex items-center space-x-2">
+                        <BookOpen className="h-5 w-5" />
+                        <span>Learning & Study Settings</span>
+                      </CardTitle>
+                      <CardDescription>
+                        Configure your learning preferences and study schedule
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="space-y-2">
+                        <Label htmlFor="settings-englishLevel">English Level</Label>
+                        {isEditing ? (
+                          <Select value={editForm.englishLevel || ""} onValueChange={(value) => handleFormChange("englishLevel", value)}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select your level" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Beginner">Beginner</SelectItem>
+                              <SelectItem value="Intermediate">Intermediate</SelectItem>
+                              <SelectItem value="Advanced">Advanced</SelectItem>
+                              <SelectItem value="Native">Native</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <div className="p-3 bg-gray-50 rounded-md">
+                            {profile.englishLevel ? (
+                              <Badge className={getLevelColor(profile.englishLevel)}>
+                                {profile.englishLevel}
+                              </Badge>
+                            ) : (
+                              <span className="text-sm">Not specified</span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Learning Goals</Label>
+                        {isEditing ? (
+                          <div className="space-y-3">
+                            <div className="flex flex-wrap gap-2">
+                              {editForm.learningGoals?.map((goal, index) => (
+                                <Badge key={index} variant="secondary" className="px-3 py-1">
+                                  {goal}
+                                  <button
+                                    onClick={() => removeArrayItem("learningGoals", goal)}
+                                    className="ml-2 text-xs hover:text-red-600"
+                                  >
+                                    ×
+                                  </button>
+                                </Badge>
+                              ))}
+                            </div>
+                            <div className="flex gap-2">
+                              <Input
+                                placeholder="Add a learning goal"
+                                onKeyPress={(e) => {
+                                  if (e.key === 'Enter') {
+                                    addArrayItem("learningGoals", (e.target as HTMLInputElement).value);
+                                    (e.target as HTMLInputElement).value = '';
+                                  }
+                                }}
+                              />
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  const input = document.querySelector('input[placeholder="Add a learning goal"]') as HTMLInputElement;
+                                  if (input?.value.trim()) {
+                                    addArrayItem("learningGoals", input.value.trim());
+                                    input.value = '';
+                                  }
+                                }}
+                              >
+                                <Plus className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="p-3 bg-gray-50 rounded-md">
+                            <div className="flex flex-wrap gap-2">
+                              {profile.learningGoals?.map((goal, index) => (
+                                <Badge key={index} variant="secondary" className="px-3 py-1">
+                                  {goal}
+                                </Badge>
+                              )) || <span className="text-sm">No learning goals set</span>}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <Label>Preferred Study Days</Label>
+                          {isEditing ? (
+                            <div className="space-y-3">
+                              <div className="flex flex-wrap gap-2">
+                                {editForm.preferredStudyDays?.map((day, index) => (
+                                  <Badge key={index} variant="secondary" className="px-3 py-1">
+                                    {day}
+                                    <button
+                                      onClick={() => removeArrayItem("preferredStudyDays", day)}
+                                      className="ml-2 text-xs hover:text-red-600"
+                                    >
+                                      ×
+                                    </button>
+                                  </Badge>
+                                ))}
+                              </div>
+                              <div className="flex gap-2">
+                                <Select onValueChange={(value) => addArrayItem("preferredStudyDays", value)}>
+                                  <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Add study day" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="Monday">Monday</SelectItem>
+                                    <SelectItem value="Tuesday">Tuesday</SelectItem>
+                                    <SelectItem value="Wednesday">Wednesday</SelectItem>
+                                    <SelectItem value="Thursday">Thursday</SelectItem>
+                                    <SelectItem value="Friday">Friday</SelectItem>
+                                    <SelectItem value="Saturday">Saturday</SelectItem>
+                                    <SelectItem value="Sunday">Sunday</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="p-3 bg-gray-50 rounded-md">
+                              <div className="flex flex-wrap gap-2">
+                                {profile.preferredStudyDays?.map((day, index) => (
+                                  <Badge key={index} variant="secondary" className="px-3 py-1">
+                                    {day}
+                                  </Badge>
+                                )) || <span className="text-sm">No preference set</span>}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Preferred Study Times</Label>
+                          {isEditing ? (
+                            <div className="space-y-3">
+                              <div className="flex flex-wrap gap-2">
+                                {editForm.preferredStudyTimes?.map((time, index) => (
+                                  <Badge key={index} variant="secondary" className="px-3 py-1">
+                                    {time}
+                                    <button
+                                      onClick={() => removeArrayItem("preferredStudyTimes", time)}
+                                      className="ml-2 text-xs hover:text-red-600"
+                                    >
+                                      ×
+                                    </button>
+                                  </Badge>
+                                ))}
+                              </div>
+                              <div className="flex gap-2">
+                                <Select onValueChange={(value) => addArrayItem("preferredStudyTimes", value)}>
+                                  <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Add study time" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="Morning (6AM-12PM)">Morning (6AM-12PM)</SelectItem>
+                                    <SelectItem value="Afternoon (12PM-6PM)">Afternoon (12PM-6PM)</SelectItem>
+                                    <SelectItem value="Evening (6PM-10PM)">Evening (6PM-10PM)</SelectItem>
+                                    <SelectItem value="Night (10PM-6AM)">Night (10PM-6AM)</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="p-3 bg-gray-50 rounded-md">
+                              <div className="flex flex-wrap gap-2">
+                                {profile.preferredStudyTimes?.map((time, index) => (
+                                  <Badge key={index} variant="secondary" className="px-3 py-1">
+                                    {time}
+                                  </Badge>
+                                )) || <span className="text-sm">No preference set</span>}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <Label>Interests</Label>
+                          {isEditing ? (
+                            <div className="space-y-3">
+                              <div className="flex flex-wrap gap-2">
+                                {editForm.interests?.map((interest, index) => (
+                                  <Badge key={index} variant="outline" className="px-3 py-1">
+                                    {interest}
+                                    <button
+                                      onClick={() => removeArrayItem("interests", interest)}
+                                      className="ml-2 text-xs hover:text-red-600"
+                                    >
+                                      ×
+                                    </button>
+                                  </Badge>
+                                ))}
+                              </div>
+                              <div className="flex gap-2">
+                                <Input
+                                  placeholder="Add an interest"
+                                  onKeyPress={(e) => {
+                                    if (e.key === 'Enter') {
+                                      addArrayItem("interests", (e.target as HTMLInputElement).value);
+                                      (e.target as HTMLInputElement).value = '';
+                                    }
+                                  }}
+                                />
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    const input = document.querySelector('input[placeholder="Add an interest"]') as HTMLInputElement;
+                                    if (input?.value.trim()) {
+                                      addArrayItem("interests", input.value.trim());
+                                      input.value = '';
+                                    }
+                                  }}
+                                >
+                                  <Plus className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="p-3 bg-gray-50 rounded-md">
+                              <div className="flex flex-wrap gap-2">
+                                {profile.interests?.map((interest, index) => (
+                                  <Badge key={index} variant="outline" className="px-3 py-1">
+                                    {interest}
+                                  </Badge>
+                                )) || <span className="text-sm">No interests specified</span>}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Hobbies</Label>
+                          {isEditing ? (
+                            <div className="space-y-3">
+                              <div className="flex flex-wrap gap-2">
+                                {editForm.hobbies?.map((hobby, index) => (
+                                  <Badge key={index} variant="outline" className="px-3 py-1">
+                                    {hobby}
+                                    <button
+                                      onClick={() => removeArrayItem("hobbies", hobby)}
+                                      className="ml-2 text-xs hover:text-red-600"
+                                    >
+                                      ×
+                                    </button>
+                                  </Badge>
+                                ))}
+                              </div>
+                              <div className="flex gap-2">
+                                <Input
+                                  placeholder="Add a hobby"
+                                  onKeyPress={(e) => {
+                                    if (e.key === 'Enter') {
+                                      addArrayItem("hobbies", (e.target as HTMLInputElement).value);
+                                      (e.target as HTMLInputElement).value = '';
+                                    }
+                                  }}
+                                />
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    const input = document.querySelector('input[placeholder="Add a hobby"]') as HTMLInputElement;
+                                    if (input?.value.trim()) {
+                                      addArrayItem("hobbies", input.value.trim());
+                                      input.value = '';
+                                    }
+                                  }}
+                                >
+                                  <Plus className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="p-3 bg-gray-50 rounded-md">
+                              <div className="flex flex-wrap gap-2">
+                                {profile.hobbies?.map((hobby, index) => (
+                                  <Badge key={index} variant="outline" className="px-3 py-1">
+                                    {hobby}
+                                  </Badge>
+                                )) || <span className="text-sm">No hobbies specified</span>}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Professional Settings (Teacher Only) */}
+                {isTeacher && (
+                  <Card className="bg-white/80 backdrop-blur-sm shadow-xl border-0">
+                    <CardHeader>
+                      <CardTitle className="flex items-center space-x-2">
+                        <Award className="h-5 w-5" />
+                        <span>Professional Settings</span>
+                      </CardTitle>
+                      <CardDescription>
+                        Manage your teaching profile and professional information
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="space-y-2">
+                        <Label htmlFor="settings-bio">Professional Bio</Label>
+                        {isEditing ? (
+                          <Textarea
+                            id="settings-bio"
+                            value={editForm.bio || ""}
+                            onChange={(e) => handleFormChange("bio", e.target.value)}
+                            placeholder="Tell students about your teaching style, experience, and approach..."
+                            rows={4}
+                          />
+                        ) : (
+                          <div className="p-3 bg-gray-50 rounded-md min-h-[100px]">
+                            <span className="text-sm">{profile.bio || "No bio provided"}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <Label htmlFor="settings-experience">Experience</Label>
+                          {isEditing ? (
+                            <Input
+                              id="settings-experience"
+                              value={editForm.experience || ""}
+                              onChange={(e) => handleFormChange("experience", e.target.value)}
+                              placeholder="e.g., 5 years of teaching experience"
+                            />
+                          ) : (
+                            <div className="p-3 bg-gray-50 rounded-md">
+                              <span className="text-sm">{profile.experience || "Not specified"}</span>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Specializations</Label>
+                          {isEditing ? (
+                            <div className="space-y-3">
+                              <div className="flex flex-wrap gap-2">
+                                {editForm.specialties?.map((specialty, index) => (
+                                  <Badge key={index} variant="secondary" className="px-3 py-1">
+                                    {specialty}
+                                    <button
+                                      onClick={() => removeArrayItem("specialties", specialty)}
+                                      className="ml-2 text-xs hover:text-red-600"
+                                    >
+                                      ×
+                                    </button>
+                                  </Badge>
+                                ))}
+                              </div>
+                              <div className="flex gap-2">
+                                <Input
+                                  placeholder="Add a specialization"
+                                  onKeyPress={(e) => {
+                                    if (e.key === 'Enter') {
+                                      addArrayItem("specialties", (e.target as HTMLInputElement).value);
+                                      (e.target as HTMLInputElement).value = '';
+                                    }
+                                  }}
+                                />
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    const input = document.querySelector('input[placeholder="Add a specialization"]') as HTMLInputElement;
+                                    if (input?.value.trim()) {
+                                      addArrayItem("specialties", input.value.trim());
+                                      input.value = '';
+                                    }
+                                  }}
+                                >
+                                  <Plus className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="p-3 bg-gray-50 rounded-md">
+                              <div className="flex flex-wrap gap-2">
+                                {profile.specialties?.map((specialty, index) => (
+                                  <Badge key={index} variant="secondary" className="px-3 py-1">
+                                    {specialty}
+                                  </Badge>
+                                )) || <span className="text-sm">No specializations specified</span>}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="space-y-2">
+                          <Label>Rating</Label>
+                          <div className="p-3 bg-gray-50 rounded-md">
+                            <div className="flex items-center space-x-2">
+                              <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                              <span className="text-sm font-medium">{profile.rating || "0.0"}</span>
+                              <span className="text-xs text-gray-500">/5.0</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Total Students</Label>
+                          <div className="p-3 bg-gray-50 rounded-md">
+                            <span className="text-sm font-medium">{profile.totalStudents || "0"}</span>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Availability Hours</Label>
+                          <div className="p-3 bg-gray-50 rounded-md">
+                            <span className="text-sm font-medium">{profile.availabilityHours || "0"} hrs/week</span>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 )}
               </TabsContent>
 
