@@ -48,16 +48,46 @@ export async function GET(request: NextRequest) {
       ]
     })
 
-    // Transform to match frontend interface
-    const transformedAvailabilities = availabilities.map(avail => ({
-      id: `${dayNumberToName(avail.dayOfWeek)}-${avail.startTime}`,
-      dayOfWeek: dayNumberToName(avail.dayOfWeek),
-      startTime: avail.startTime,
-      endTime: avail.endTime,
-      isAvailable: avail.isAvailable
-    }))
+    // Create a map of existing availabilities for quick lookup
+    const availabilityMap = new Map()
+    availabilities.forEach(avail => {
+      const key = `${dayNumberToName(avail.dayOfWeek)}-${avail.startTime}`
+      availabilityMap.set(key, avail)
+    })
 
-    return NextResponse.json(transformedAvailabilities)
+    // Generate all possible time slots
+    const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    const timeSlots = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00"]
+    
+    const allSlots = []
+    for (const day of daysOfWeek) {
+      for (const time of timeSlots) {
+        const key = `${day}-${time}`
+        const existingAvail = availabilityMap.get(key)
+        
+        if (existingAvail) {
+          // Use existing availability from database
+          allSlots.push({
+            id: key,
+            dayOfWeek: day,
+            startTime: time,
+            endTime: existingAvail.endTime,
+            isAvailable: existingAvail.isAvailable
+          })
+        } else {
+          // Create default unavailable slot
+          allSlots.push({
+            id: key,
+            dayOfWeek: day,
+            startTime: time,
+            endTime: `${parseInt(time) + 1}:00`,
+            isAvailable: false
+          })
+        }
+      }
+    }
+
+    return NextResponse.json(allSlots)
   } catch (error) {
     console.error("Error fetching availability:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
@@ -88,16 +118,20 @@ export async function POST(request: NextRequest) {
       where: { teacherId: teacherProfile.id }
     })
 
-    // Then create new availability records
-    const newAvailabilities = await db.availability.createMany({
-      data: availabilities.map((avail: any) => ({
-        teacherId: teacherProfile.id,
-        dayOfWeek: dayNameToNumber(avail.dayOfWeek),
-        startTime: avail.startTime,
-        endTime: avail.endTime,
-        isAvailable: avail.isAvailable,
-      }))
-    })
+    // Only create records for available slots to optimize storage
+    const availableSlots = availabilities.filter((avail: any) => avail.isAvailable)
+    
+    if (availableSlots.length > 0) {
+      await db.availability.createMany({
+        data: availableSlots.map((avail: any) => ({
+          teacherId: teacherProfile.id,
+          dayOfWeek: dayNameToNumber(avail.dayOfWeek),
+          startTime: avail.startTime,
+          endTime: avail.endTime,
+          isAvailable: true,
+        }))
+      })
+    }
 
     return NextResponse.json({ message: "Availability updated successfully" })
   } catch (error) {
@@ -130,16 +164,20 @@ export async function PUT(request: NextRequest) {
       where: { teacherId: teacherProfile.id }
     })
 
-    // Then create new availability records
-    const newAvailabilities = await db.availability.createMany({
-      data: availability.map((avail: any) => ({
-        teacherId: teacherProfile.id,
-        dayOfWeek: dayNameToNumber(avail.dayOfWeek),
-        startTime: avail.startTime,
-        endTime: avail.endTime,
-        isAvailable: avail.isAvailable,
-      }))
-    })
+    // Only create records for available slots to optimize storage
+    const availableSlots = availability.filter((avail: any) => avail.isAvailable)
+    
+    if (availableSlots.length > 0) {
+      await db.availability.createMany({
+        data: availableSlots.map((avail: any) => ({
+          teacherId: teacherProfile.id,
+          dayOfWeek: dayNameToNumber(avail.dayOfWeek),
+          startTime: avail.startTime,
+          endTime: avail.endTime,
+          isAvailable: true,
+        }))
+      })
+    }
 
     return NextResponse.json({ message: "Availability updated successfully" })
   } catch (error) {

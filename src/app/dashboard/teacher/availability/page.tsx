@@ -68,39 +68,23 @@ export default function TeacherAvailabilityPage() {
       if (response.ok) {
         const data = await response.json()
         console.log('Fetched data:', data)
-        if (Array.isArray(data) && data.length > 0) {
+        if (Array.isArray(data)) {
           setAvailability(data)
         } else {
-          console.log('No availability data, initializing default')
-          initializeDefaultAvailability()
+          console.error('Invalid data format received from API')
+          // Initialize with empty array if invalid data
+          setAvailability([])
         }
       } else {
-        console.log('Fetch failed, initializing default')
-        initializeDefaultAvailability()
+        console.error('Fetch failed with status:', response.status)
+        setAvailability([])
       }
     } catch (error) {
       console.error("Failed to fetch availability:", error)
-      console.log('Error occurred, initializing default')
-      initializeDefaultAvailability()
+      setAvailability([])
     } finally {
       setLoading(false)
     }
-  }
-
-  const initializeDefaultAvailability = () => {
-    const defaultAvailability: TimeSlot[] = []
-    daysOfWeek.forEach(day => {
-      timeSlots.forEach(time => {
-        defaultAvailability.push({
-          id: `${day}-${time}`,
-          dayOfWeek: day,
-          startTime: time,
-          endTime: `${parseInt(time) + 1}:00`,
-          isAvailable: false
-        })
-      })
-    })
-    setAvailability(defaultAvailability)
   }
 
   const setAvailabilityPattern = (pattern: (day: string, time: string) => boolean) => {
