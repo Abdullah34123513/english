@@ -13,6 +13,11 @@ import { BookingConfirmationPopup } from "./booking-confirmation-popup"
 import { ValidationError, BookingError, handleUnknownError } from "@/lib/custom-error"
 import { createLogger } from "@/lib/logger"
 import { 
+  formatTimeForDisplay, 
+  dayNumberToName,
+  formatDateAndTimeForDisplay
+} from "@/lib/time-utils"
+import { 
   Star, 
   Clock, 
   DollarSign, 
@@ -296,22 +301,17 @@ export function EnhancedTeacherCard({ teacher, studentId, onBookClass, onSubmitP
     }
   }
 
-  const formatDayName = (dayIndex: number) => {
-    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-    return days[dayIndex]
-  }
-
   const getAvailabilitySummary = () => {
     const availabilityByDay = teacher.availability.reduce((acc, avail) => {
       if (!acc[avail.dayOfWeek]) {
         acc[avail.dayOfWeek] = []
       }
-      acc[avail.dayOfWeek].push(`${avail.startTime}-${avail.endTime}`)
+      acc[avail.dayOfWeek].push(`${formatTimeForDisplay(avail.startTime)}-${formatTimeForDisplay(avail.endTime)}`)
       return acc
     }, {} as Record<number, string[]>)
 
     return Object.entries(availabilityByDay).slice(0, 3).map(([day, times]) => ({
-      day: formatDayName(parseInt(day)),
+      day: dayNumberToName(parseInt(day)),
       times: times.slice(0, 2).join(', ')
     }))
   }
@@ -653,7 +653,7 @@ export function EnhancedTeacherCard({ teacher, studentId, onBookClass, onSubmitP
                                     <div className="flex items-center justify-between">
                                       <div className="flex items-center min-w-0 flex-1">
                                         <Clock className="h-4 w-4 mr-2 flex-shrink-0" />
-                                        <span className="font-semibold truncate">{slot.startTime} - {slot.endTime}</span>
+                                        <span className="font-semibold truncate">{formatTimeForDisplay(slot.startTime)} - {formatTimeForDisplay(slot.endTime)}</span>
                                       </div>
                                       <Zap className="h-4 w-4 opacity-75 group-hover:scale-110 transition-transform flex-shrink-0 ml-2" />
                                     </div>

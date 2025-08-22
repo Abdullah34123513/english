@@ -17,6 +17,7 @@ import {
   XCircle
 } from "lucide-react"
 import Link from "next/link"
+import { formatTimeForDisplay } from "@/lib/time-utils"
 
 interface TimeSlot {
   id: string
@@ -95,6 +96,17 @@ export default function TeacherAvailabilityPage() {
     }))
     console.log('Updated availability:', updatedAvailability)
     setAvailability(updatedAvailability)
+  }
+
+  const toggleTimeSlot = (slotId: string) => {
+    console.log('Toggling slot:', slotId)
+    setAvailability(prev => 
+      prev.map(slot => 
+        slot.id === slotId 
+          ? { ...slot, isAvailable: !slot.isAvailable }
+          : slot
+      )
+    )
   }
 
   const saveAvailability = async () => {
@@ -288,28 +300,52 @@ export default function TeacherAvailabilityPage() {
             <CardTitle className="flex items-center">
               <Calendar className="h-5 w-5 mr-2 text-blue-600" />
               Current Availability Summary
+              <Badge variant="outline" className="ml-2 text-xs">
+                Click to edit
+              </Badge>
             </CardTitle>
             <CardDescription>
-              Overview of your weekly availability
+              Click on any time slot to toggle availability. Green = Available, Gray = Unavailable
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {daysOfWeek.map(day => {
                 const daySlots = getAvailableSlotsByDay(day)
+                const allDaySlots = availability.filter(slot => slot.dayOfWeek === day)
+                
                 return (
                   <div key={day} className="p-4 bg-gray-50 rounded-lg">
-                    <h4 className="font-medium text-gray-900 mb-2">{day}</h4>
+                    <h4 className="font-medium text-gray-900 mb-3 flex items-center">
+                      {day}
+                      <Badge variant="secondary" className="ml-2 text-xs">
+                        {daySlots.length}/{allDaySlots.length}
+                      </Badge>
+                    </h4>
                     <div className="space-y-1">
-                      {daySlots.length > 0 ? (
-                        daySlots.map(slot => (
-                          <div key={slot.id} className="flex items-center text-sm text-green-600">
-                            <CheckCircle className="h-3 w-3 mr-1" />
-                            {slot.startTime} - {slot.endTime}
-                          </div>
+                      {allDaySlots.length > 0 ? (
+                        allDaySlots.map(slot => (
+                          <button
+                            key={slot.id}
+                            onClick={() => toggleTimeSlot(slot.id)}
+                            className={`w-full flex items-center text-sm p-2 rounded-md transition-colors cursor-pointer hover:opacity-80 ${
+                              slot.isAvailable
+                                ? "bg-green-100 text-green-800 hover:bg-green-200"
+                                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                            }`}
+                          >
+                            {slot.isAvailable ? (
+                              <CheckCircle className="h-3 w-3 mr-2 flex-shrink-0" />
+                            ) : (
+                              <XCircle className="h-3 w-3 mr-2 flex-shrink-0" />
+                            )}
+                            <span className="text-xs font-medium">
+                              {formatTimeForDisplay(slot.startTime)} - {formatTimeForDisplay(slot.endTime)}
+                            </span>
+                          </button>
                         ))
                       ) : (
-                        <div className="flex items-center text-sm text-gray-500">
+                        <div className="flex items-center text-sm text-gray-500 p-2">
                           <XCircle className="h-3 w-3 mr-1" />
                           No availability set
                         </div>

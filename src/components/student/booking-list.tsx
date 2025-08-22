@@ -8,6 +8,11 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Calendar, Clock, User, Video, Star, MessageCircle, X } from "lucide-react"
 import { ReviewDialog } from "./review-dialog"
+import { 
+  formatDateTimeForDisplay, 
+  formatDateForDisplay, 
+  isUpcoming 
+} from "@/lib/time-utils"
 
 interface BookingListProps {
   studentData: any
@@ -132,26 +137,6 @@ export function BookingList({ studentData, onUpdate }: BookingListProps) {
     }
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    })
-  }
-
-  const formatTime = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-    })
-  }
-
-  const isUpcoming = (dateString: string) => {
-    return new Date(dateString) > new Date()
-  }
-
   const upcomingBookings = bookings.filter(booking => isUpcoming(booking.startTime))
   const pastBookings = bookings.filter(booking => !isUpcoming(booking.startTime))
 
@@ -211,11 +196,11 @@ export function BookingList({ studentData, onUpdate }: BookingListProps) {
                       <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-3">
                         <div className="flex items-center">
                           <Calendar className="h-4 w-4 mr-1" />
-                          {formatDate(booking.startTime)}
+                          {formatDateForDisplay(booking.startTime)}
                         </div>
                         <div className="flex items-center">
                           <Clock className="h-4 w-4 mr-1" />
-                          {formatTime(booking.startTime)} - {formatTime(booking.endTime)}
+                          {formatDateTimeForDisplay(booking.startTime)} - {formatDateTimeForDisplay(booking.endTime)}
                         </div>
                       </div>
 
@@ -293,11 +278,11 @@ export function BookingList({ studentData, onUpdate }: BookingListProps) {
                       <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-3">
                         <div className="flex items-center">
                           <Calendar className="h-4 w-4 mr-1" />
-                          {formatDate(booking.startTime)}
+                          {formatDateForDisplay(booking.startTime)}
                         </div>
                         <div className="flex items-center">
                           <Clock className="h-4 w-4 mr-1" />
-                          {formatTime(booking.startTime)} - {formatTime(booking.endTime)}
+                          {formatDateTimeForDisplay(booking.startTime)} - {formatDateTimeForDisplay(booking.endTime)}
                         </div>
                       </div>
 
