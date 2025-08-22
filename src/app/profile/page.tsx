@@ -95,6 +95,20 @@ interface ActivityItem {
   icon: React.ComponentType<any>
 }
 
+// Helper function to safely convert any value to an array
+const safeArray = (value: any): any[] => {
+  if (value === null || value === undefined) {
+    return []
+  }
+  if (Array.isArray(value)) {
+    return value
+  }
+  if (typeof value === 'string') {
+    return value ? [value] : []
+  }
+  return []
+}
+
 export default function ProfilePage() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -745,7 +759,7 @@ export default function ProfilePage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {(recentActivity || []).map((activity) => (
+                {safeArray(recentActivity).map((activity) => (
                   <div key={activity.id} className="flex items-start space-x-3 p-3 rounded-lg bg-gray-50">
                     <div className="flex-shrink-0">
                       <activity.icon className="h-5 w-5 text-blue-600" />
@@ -1002,7 +1016,7 @@ export default function ProfilePage() {
                             <label className="text-sm font-medium text-gray-500">Learning Goals</label>
                             <div className="space-y-3 mt-3">
                               <div className="flex flex-wrap gap-2">
-                                {(editForm.learningGoals || []).map((goal, index) => (
+                                {safeArray(editForm.learningGoals).map((goal, index) => (
                                   <Badge key={index} variant="secondary" className="text-sm px-3 py-1 flex items-center">
                                     {goal}
                                     <button
@@ -1044,7 +1058,7 @@ export default function ProfilePage() {
                             <div>
                               <label className="text-sm font-medium text-gray-500">Learning Goals</label>
                               <div className="flex flex-wrap gap-2 mt-3">
-                                {(profile.learningGoals || []).map((goal, index) => (
+                                {safeArray(profile.learningGoals).map((goal, index) => (
                                   <Badge key={index} variant="secondary" className="text-sm px-3 py-1">
                                     {goal}
                                   </Badge>
@@ -1092,7 +1106,7 @@ export default function ProfilePage() {
                     </CardHeader>
                     <CardContent>
                       <div className="flex flex-wrap gap-3">
-                        {(profile.specialties || []).map((specialty, index) => (
+                        {safeArray(profile.specialties).map((specialty, index) => (
                           <Badge key={index} variant="secondary" className="text-sm px-4 py-2">
                             {specialty}
                           </Badge>
@@ -1116,7 +1130,7 @@ export default function ProfilePage() {
                         </CardHeader>
                         <CardContent>
                           <div className="flex flex-wrap gap-3">
-                            {(profile.interests || []).map((interest, index) => (
+                            {safeArray(profile.interests).map((interest, index) => (
                               <Badge key={index} variant="outline" className="flex items-center space-x-2 px-4 py-2">
                                 {getInterestIcon(interest)}
                                 <span>{interest}</span>
@@ -1136,7 +1150,7 @@ export default function ProfilePage() {
                         </CardHeader>
                         <CardContent>
                           <div className="flex flex-wrap gap-3">
-                            {(profile.hobbies || []).map((hobby, index) => (
+                            {safeArray(profile.hobbies).map((hobby, index) => (
                               <Badge key={index} variant="outline" className="px-4 py-2">
                                 {hobby}
                               </Badge>
@@ -1158,7 +1172,7 @@ export default function ProfilePage() {
                             <div>
                               <label className="text-sm font-medium text-gray-500">Preferred Days</label>
                               <div className="flex flex-wrap gap-2 mt-3">
-                                {(profile.preferredStudyDays || []).map((day, index) => (
+                                {safeArray(profile.preferredStudyDays).map((day, index) => (
                                   <Badge key={index} variant="secondary" className="px-3 py-1">
                                     {day}
                                   </Badge>
@@ -1170,7 +1184,7 @@ export default function ProfilePage() {
                             <div>
                               <label className="text-sm font-medium text-gray-500">Preferred Times</label>
                               <div className="flex flex-wrap gap-2 mt-3">
-                                {(profile.preferredStudyTimes || []).map((time, index) => (
+                                {safeArray(profile.preferredStudyTimes).map((time, index) => (
                                   <Badge key={index} variant="secondary" className="px-3 py-1">
                                     {time}
                                   </Badge>
@@ -1597,7 +1611,7 @@ export default function ProfilePage() {
                         {isEditing ? (
                           <div className="space-y-3">
                             <div className="flex flex-wrap gap-2">
-                              {editForm.learningGoals?.map((goal, index) => (
+                              {safeArray(editForm.learningGoals).map((goal, index) => (
                                 <Badge key={index} variant="secondary" className="px-3 py-1">
                                   {goal}
                                   <button
@@ -1654,7 +1668,7 @@ export default function ProfilePage() {
                           {isEditing ? (
                             <div className="space-y-3">
                               <div className="flex flex-wrap gap-2">
-                                {editForm.preferredStudyDays?.map((day, index) => (
+                                {safeArray(editForm.preferredStudyDays).map((day, index) => (
                                   <Badge key={index} variant="secondary" className="px-3 py-1">
                                     {day}
                                     <button
@@ -1701,7 +1715,7 @@ export default function ProfilePage() {
                           {isEditing ? (
                             <div className="space-y-3">
                               <div className="flex flex-wrap gap-2">
-                                {editForm.preferredStudyTimes?.map((time, index) => (
+                                {safeArray(editForm.preferredStudyTimes).map((time, index) => (
                                   <Badge key={index} variant="secondary" className="px-3 py-1">
                                     {time}
                                     <button
@@ -1747,7 +1761,7 @@ export default function ProfilePage() {
                           {isEditing ? (
                             <div className="space-y-3">
                               <div className="flex flex-wrap gap-2">
-                                {editForm.interests?.map((interest, index) => (
+                                {safeArray(editForm.interests).map((interest, index) => (
                                   <Badge key={index} variant="outline" className="px-3 py-1">
                                     {interest}
                                     <button
@@ -1803,7 +1817,7 @@ export default function ProfilePage() {
                           {isEditing ? (
                             <div className="space-y-3">
                               <div className="flex flex-wrap gap-2">
-                                {editForm.hobbies?.map((hobby, index) => (
+                                {safeArray(editForm.hobbies).map((hobby, index) => (
                                   <Badge key={index} variant="outline" className="px-3 py-1">
                                     {hobby}
                                     <button
@@ -1910,7 +1924,7 @@ export default function ProfilePage() {
                           {isEditing ? (
                             <div className="space-y-3">
                               <div className="flex flex-wrap gap-2">
-                                {editForm.specialties?.map((specialty, index) => (
+                                {safeArray(editForm.specialties).map((specialty, index) => (
                                   <Badge key={index} variant="secondary" className="px-3 py-1">
                                     {specialty}
                                     <button
