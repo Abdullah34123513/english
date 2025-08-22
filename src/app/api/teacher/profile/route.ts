@@ -126,12 +126,13 @@ export async function PUT(request: NextRequest) {
 
     // Also update user profile if country or timezone is provided
     if (country || timezone) {
+      const updateData: any = {}
+      if (country) updateData.location = country
+      if (timezone) updateData.timezone = timezone
+      
       await db.user.update({
         where: { id: session.user.id },
-        data: {
-          ...(country && { location: country }),
-          ...(timezone && { timezone }),
-        }
+        data: updateData
       })
     }
 

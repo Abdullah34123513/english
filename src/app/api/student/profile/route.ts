@@ -236,6 +236,18 @@ export async function PUT(request: NextRequest) {
       }
     })
 
+    // Also update user profile if country or timezone is provided
+    if (data.country || data.timezone) {
+      const updateData: any = {}
+      if (data.country) updateData.location = data.country
+      if (data.timezone) updateData.timezone = data.timezone
+      
+      await db.user.update({
+        where: { id: session.user.id },
+        data: updateData
+      })
+    }
+
     return NextResponse.json(updatedStudent)
   } catch (error) {
     console.error("Error updating student profile:", error)
