@@ -1,7 +1,7 @@
 "use client"
 
 import { useSession } from "next-auth/react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -53,11 +53,10 @@ interface Review {
   }
 }
 
-export default function TeacherProfilePage() {
+export default function TeacherProfilePage({ params }: { params: { id: string } }) {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const teacherId = searchParams.get('id') || ''
+  const teacherId = params.id
   const [teacher, setTeacher] = useState<Teacher | null>(null)
   const [reviews, setReviews] = useState<Review[]>([])
   const [loading, setLoading] = useState(true)
@@ -65,22 +64,28 @@ export default function TeacherProfilePage() {
 
   useEffect(() => {
     if (teacherId) {
-      fetchTeacherProfile()
-      fetchTeacherReviews()
+      Promise.all([
+        fetchTeacherProfile(),
+        fetchTeacherReviews()
+      ]).finally(() => {
+        setLoading(false)
+      })
+    } else {
+      setLoading(false)
     }
   }, [teacherId])
 
   const fetchTeacherProfile = async () => {
     try {
-      const response = await fetch(`/api/teacher/profile?id=${teacherId}`)
+      const response = await fetch(`/api/teacher/${teacherId}/profile`)
       if (response.ok) {
         const data = await response.json()
         setTeacher(data)
+      } else {
+        console.error("Failed to fetch teacher profile:", response.status, response.statusText)
       }
     } catch (error) {
       console.error("Failed to fetch teacher profile:", error)
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -90,6 +95,8 @@ export default function TeacherProfilePage() {
       if (response.ok) {
         const data = await response.json()
         setReviews(data)
+      } else {
+        console.error("Failed to fetch teacher reviews:", response.status, response.statusText)
       }
     } catch (error) {
       console.error("Failed to fetch teacher reviews:", error)
