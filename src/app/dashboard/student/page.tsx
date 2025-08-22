@@ -242,7 +242,7 @@ export default function StudentDashboard() {
 
         {/* Main Content */}
         <Tabs defaultValue="browse" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 bg-white p-1 rounded-xl shadow-sm">
+          <TabsList className="grid w-full grid-cols-3 bg-white p-1 rounded-xl shadow-sm">
             <TabsTrigger value="browse" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-lg transition-all duration-200">
               <Search className="h-4 w-4 mr-2" />
               Browse Teachers
@@ -254,10 +254,6 @@ export default function StudentDashboard() {
             <TabsTrigger value="history" className="data-[state=active]:bg-pink-600 data-[state=active]:text-white rounded-lg transition-all duration-200">
               <BarChart3 className="h-4 w-4 mr-2" />
               Progress
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="data-[state=active]:bg-green-600 data-[state=active]:text-white rounded-lg transition-all duration-200">
-              <User className="h-4 w-4 mr-2" />
-              Settings
             </TabsTrigger>
           </TabsList>
 
@@ -337,102 +333,6 @@ export default function StudentDashboard() {
                   </div>
                 </CardContent>
               </Card>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="settings">
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <div className="mb-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">Profile Settings</h3>
-                <p className="text-gray-600">Complete your profile to get personalized teacher recommendations</p>
-              </div>
-
-              <div className="space-y-6">
-                {/* Profile Completion */}
-                <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-xl border border-blue-200">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="bg-blue-100 p-2 rounded-lg">
-                        <User className="h-5 w-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-gray-900">Complete Your Profile</h4>
-                        <p className="text-sm text-gray-600">
-                          Add your learning preferences and goals to get better teacher matches
-                        </p>
-                      </div>
-                    </div>
-                    <Button 
-                      onClick={() => router.push("/dashboard/student/settings")}
-                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
-                    >
-                      Edit Profile
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </Button>
-                  </div>
-                </div>
-                
-                {/* Profile Information */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Card className="border-0 bg-gradient-to-br from-white to-blue-50/50">
-                    <CardHeader>
-                      <CardTitle className="text-lg flex items-center">
-                        <User className="h-5 w-5 mr-2 text-blue-600" />
-                        Basic Information
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-                        <span className="text-sm font-medium text-gray-700">Age</span>
-                        <span className="text-sm text-gray-600">
-                          {studentData?.age ? studentData.age : "Not set"}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-                        <span className="text-sm font-medium text-gray-700">Country</span>
-                        <span className="text-sm text-gray-600">
-                          {studentData?.country ? studentData.country : "Not set"}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-                        <span className="text-sm font-medium text-gray-700">Native Language</span>
-                        <span className="text-sm text-gray-600">
-                          {studentData?.nativeLanguage ? studentData.nativeLanguage : "Not set"}
-                        </span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card className="border-0 bg-gradient-to-br from-white to-purple-50/50">
-                    <CardHeader>
-                      <CardTitle className="text-lg flex items-center">
-                        <Target className="h-5 w-5 mr-2 text-purple-600" />
-                        Learning Preferences
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
-                        <span className="text-sm font-medium text-gray-700">Current Level</span>
-                        <span className="text-sm text-gray-600">
-                          {studentData?.currentLevel ? studentData.currentLevel : "Not set"}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
-                        <span className="text-sm font-medium text-gray-700">Study Frequency</span>
-                        <span className="text-sm text-gray-600">
-                          {studentData?.studyFrequency ? studentData.studyFrequency : "Not set"}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
-                        <span className="text-sm font-medium text-gray-700">Motivation</span>
-                        <span className="text-sm text-gray-600">
-                          {studentData?.motivation ? "Set" : "Not set"}
-                        </span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
             </div>
           </TabsContent>
         </Tabs>
