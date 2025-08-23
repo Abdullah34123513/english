@@ -25,11 +25,13 @@ import {
   Settings,
   AlertTriangle,
   CheckCircle2,
-  XCircle
+  XCircle,
+  Mail
 } from "lucide-react"
 import { BookingManagement } from "@/components/admin/booking-management"
 import { PaymentApproval } from "@/components/admin/payment-approval"
 import { EnvironmentTesting } from "@/components/admin/environment-testing"
+import { EmailTesting } from "@/components/admin/email-testing"
 
 interface DashboardStats {
   totalBookings: number
@@ -217,7 +219,7 @@ export default function AdminDashboard() {
 
         {/* Main Content */}
         <Tabs defaultValue="payments" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 bg-white p-1 rounded-xl shadow-sm">
+          <TabsList className="grid w-full grid-cols-5 bg-white p-1 rounded-xl shadow-sm">
             <TabsTrigger value="payments" className="data-[state=active]:bg-yellow-600 data-[state=active]:text-white rounded-lg transition-all duration-200">
               <CreditCard className="h-4 w-4 mr-2" />
               Payment Approvals
@@ -235,7 +237,11 @@ export default function AdminDashboard() {
               <Settings className="h-4 w-4 mr-2" />
               Environment Test
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white rounded-lg transition-all duration-200">
+            <TabsTrigger value="email" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white rounded-lg transition-all duration-200">
+              <Mail className="h-4 w-4 mr-2" />
+              Email Testing
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white rounded-lg transition-all duration-200">
               <TrendingUp className="h-4 w-4 mr-2" />
               Analytics
             </TabsTrigger>
@@ -251,6 +257,10 @@ export default function AdminDashboard() {
 
           <TabsContent value="environment">
             <EnvironmentTesting />
+          </TabsContent>
+
+          <TabsContent value="email">
+            <EmailTesting />
           </TabsContent>
 
           <TabsContent value="analytics">

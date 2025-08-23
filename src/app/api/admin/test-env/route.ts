@@ -145,7 +145,7 @@ export async function GET(request: NextRequest) {
 
     if (emailConfigured) {
       try {
-        const transporter = nodemailer.createTransporter({
+        const transporter = nodemailer.createTransport({
           host: smtpHost,
           port: parseInt(smtpPort),
           secure: smtpSecure === 'true',
