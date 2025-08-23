@@ -6,6 +6,7 @@ import GoogleProvider from "next-auth/providers/google"
 import { UserRole } from "@prisma/client"
 
 export const authOptions: NextAuthOptions = {
+  secret: process.env.NEXTAUTH_SECRET,
   adapter: PrismaAdapter(db) as any,
   providers: [
     GoogleProvider({

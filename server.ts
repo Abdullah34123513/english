@@ -1,6 +1,7 @@
 // server.ts - Next.js Standalone Server
 import { createServer } from 'http';
 import next from 'next';
+import 'dotenv/config';
 
 const dev = process.env.NODE_ENV !== 'production';
 const currentPort = 3000;
