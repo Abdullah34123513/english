@@ -17,7 +17,7 @@ async function main() {
     await prisma.teacher.deleteMany()
     await prisma.user.deleteMany()
 
-    // Hash password for demo users
+    // Hash passwords
     const demoPassword = 'demo123'
     const adminPassword = 'admin123'
     const hashedDemoPassword = await bcrypt.hash(demoPassword, 12)
@@ -57,15 +57,15 @@ async function main() {
     const teacher1 = await prisma.teacher.create({
       data: {
         userId: teacher1User.id,
-        bio: 'Certified English teacher with 8+ years of experience. Specializing in business English and conversation practice.',
+        bio: 'Certified English teacher with 8+ years of experience. Specializing in business English and conversation practice. I love helping students achieve their language learning goals through personalized lessons and engaging conversations.',
         hourlyRate: 30.0,
         experience: '8+ years',
         education: 'MA in TESOL, University of Cambridge',
         languages: JSON.stringify(['English', 'French', 'Spanish']),
-        specializations: JSON.stringify(['Business English', 'Conversation Practice']),
-        teachingStyle: 'Interactive and conversational approach',
+        specializations: JSON.stringify(['Business English', 'Conversation Practice', 'IELTS Preparation', 'Accent Reduction']),
+        teachingStyle: 'Interactive and conversational approach with focus on real-world applications',
         preferredAgeGroups: JSON.stringify(['Adults', 'Young Professionals']),
-        certifications: JSON.stringify(['TESOL', 'CELTA']),
+        certifications: JSON.stringify(['TESOL', 'CELTA', 'Business English Certificate']),
       },
     })
 
@@ -87,14 +87,14 @@ async function main() {
     const teacher2 = await prisma.teacher.create({
       data: {
         userId: teacher2User.id,
-        bio: 'Native English speaker from London. Expert in IELTS preparation and academic English.',
+        bio: 'Native English speaker from London. Expert in IELTS preparation and academic English. Passionate about helping students succeed in their academic and professional journeys.',
         hourlyRate: 35.0,
         experience: '6 years',
         education: 'BA in English Literature, University of Oxford',
         languages: JSON.stringify(['English', 'German']),
-        specializations: JSON.stringify(['IELTS Preparation', 'Academic English']),
-        teachingStyle: 'Structured and methodical approach',
-        preferredAgeGroups: JSON.stringify(['Teenagers', 'Adults']),
+        specializations: JSON.stringify(['IELTS Preparation', 'Academic English', 'Writing Skills', 'Grammar']),
+        teachingStyle: 'Structured and methodical approach with clear learning objectives',
+        preferredAgeGroups: JSON.stringify(['Teenagers', 'Adults', 'University Students']),
         certifications: JSON.stringify(['TEFL', 'IELTS Examiner Certification']),
       },
     })
@@ -117,15 +117,15 @@ async function main() {
     const teacher3 = await prisma.teacher.create({
       data: {
         userId: teacher3User.id,
-        bio: 'Experienced English teacher specializing in pronunciation and accent training.',
+        bio: 'Experienced English teacher specializing in pronunciation and accent training. Native speaker with background in linguistics and speech therapy.',
         hourlyRate: 28.0,
         experience: '10+ years',
         education: 'MA in Linguistics, Stanford University',
-        languages: JSON.stringify(['English', 'Mandarin']),
-        specializations: JSON.stringify(['Pronunciation Training', 'Accent Reduction']),
-        teachingStyle: 'Patient and supportive approach',
+        languages: JSON.stringify(['English', 'Mandarin', 'Cantonese']),
+        specializations: JSON.stringify(['Pronunciation Training', 'Accent Reduction', 'Public Speaking', 'Business Communication']),
+        teachingStyle: 'Patient and supportive with focus on pronunciation and speaking confidence',
         preferredAgeGroups: JSON.stringify(['Adults', 'Professionals']),
-        certifications: JSON.stringify(['TESOL']),
+        certifications: JSON.stringify(['TESOL', 'Pronunciation Teaching Certificate']),
       },
     })
 
@@ -151,10 +151,19 @@ async function main() {
         nativeLanguage: 'Mandarin',
         timezone: 'EST',
         currentLevel: 'Intermediate',
-        learningGoals: JSON.stringify(['Improve conversation skills', 'Business English']),
-        preferredLearningStyle: JSON.stringify(['Interactive', 'Visual']),
+        learningGoals: JSON.stringify(['Improve conversation skills', 'Business English', 'Accent reduction']),
+        targetScore: '7.5',
+        preferredLearningStyle: JSON.stringify(['Interactive', 'Visual', 'Conversational']),
         studyFrequency: '3 times per week',
         sessionDuration: '60 minutes',
+        teacherPreferences: JSON.stringify(['Native speaker', 'Business experience', 'Patient']),
+        interests: JSON.stringify(['Technology', 'Business', 'Travel', 'Music']),
+        hobbies: JSON.stringify(['Reading', 'Hiking', 'Photography', 'Cooking']),
+        preferredDays: JSON.stringify(['Monday', 'Wednesday', 'Friday']),
+        preferredTimes: JSON.stringify(['Evening', 'Afternoon']),
+        previousExperience: 'Studied English in school for 10 years, but limited speaking practice',
+        specificNeeds: 'Need to improve business English for work presentations',
+        motivation: 'Career advancement and better communication with international colleagues',
       },
     })
 
@@ -180,10 +189,19 @@ async function main() {
         nativeLanguage: 'Mandarin',
         timezone: 'CST',
         currentLevel: 'Advanced',
-        learningGoals: JSON.stringify(['IELTS preparation', 'Academic writing']),
-        preferredLearningStyle: JSON.stringify(['Structured', 'Academic']),
+        learningGoals: JSON.stringify(['IELTS preparation', 'Academic writing', 'Vocabulary expansion']),
+        targetScore: '8.0',
+        preferredLearningStyle: JSON.stringify(['Structured', 'Academic', 'Detailed']),
         studyFrequency: 'Daily',
         sessionDuration: '90 minutes',
+        teacherPreferences: JSON.stringify(['IELTS expert', 'Academic background', 'Strict']),
+        interests: JSON.stringify(['Education', 'Literature', 'Science', 'Art']),
+        hobbies: JSON.stringify(['Reading', 'Writing', 'Painting', 'Classical music']),
+        preferredDays: JSON.stringify(['Tuesday', 'Thursday', 'Saturday']),
+        preferredTimes: JSON.stringify(['Morning', 'Evening']),
+        previousExperience: 'Advanced level, preparing for IELTS exam',
+        specificNeeds: 'Need to achieve band 8.0 for university admission',
+        motivation: 'Study abroad opportunities',
       },
     })
 
@@ -209,10 +227,19 @@ async function main() {
         nativeLanguage: 'Spanish',
         timezone: 'CET',
         currentLevel: 'Beginner',
-        learningGoals: JSON.stringify(['Basic conversation', 'Travel English']),
-        preferredLearningStyle: JSON.stringify(['Relaxed', 'Conversational']),
+        learningGoals: JSON.stringify(['Basic conversation', 'Travel English', 'Pronunciation']),
+        targetScore: '6.0',
+        preferredLearningStyle: JSON.stringify(['Relaxed', 'Conversational', 'Fun']),
         studyFrequency: '2 times per week',
         sessionDuration: '45 minutes',
+        teacherPreferences: JSON.stringify(['Patient', 'Friendly', 'Native speaker']),
+        interests: JSON.stringify(['Sports', 'Travel', 'Food', 'Movies']),
+        hobbies: JSON.stringify(['Football', 'Cooking', 'Traveling', 'Watching movies']),
+        preferredDays: JSON.stringify(['Monday', 'Wednesday', 'Friday']),
+        preferredTimes: JSON.stringify(['Evening']),
+        previousExperience: 'Very limited, took some basic courses years ago',
+        specificNeeds: 'Need basic conversation skills for travel and work',
+        motivation: 'Career change and international travel',
       },
     })
 
@@ -321,14 +348,15 @@ async function main() {
       },
     })
 
-    // Create some reviews
+    console.log('⭐ Creating reviews...')
+
     await prisma.review.create({
       data: {
         studentId: student1.id,
         teacherId: teacher1.id,
         bookingId: booking1.id,
         rating: 5,
-        comment: 'Excellent teacher! Very patient and knowledgeable.',
+        comment: 'Sarah is an excellent teacher! Her business English lessons are very practical and have helped me improve my presentation skills significantly. Highly recommended!',
       },
     })
 
@@ -338,7 +366,7 @@ async function main() {
         teacherId: teacher2.id,
         bookingId: booking2.id,
         rating: 4,
-        comment: 'Great IELTS preparation, very structured approach.',
+        comment: 'Emma is very knowledgeable about IELTS preparation. Her structured approach helped me understand the exam format better. Would appreciate more speaking practice though.',
       },
     })
 
@@ -355,7 +383,7 @@ async function main() {
     console.log('   │ TEACHER 1: sarah.johnson@englishplatform.com                               │')
     console.log('   │   - Name: Sarah Johnson                                                     │')
     console.log('   │   - Rate: $30/hour                                                         │')
-    console.log('   │   - Specialties: Business English, Conversation                            │')
+    console.log('   │   - Specialties: Business English, Conversation, IELTS, Accent Reduction   │')
     console.log('   │   - Password: demo123                                                      │')
     console.log('   │   - Email Verified: ✅ Yes                                                │')
     console.log('   │   - Availability: Mon-Fri, 9:00 AM - 6:00 PM                              │')
@@ -363,7 +391,7 @@ async function main() {
     console.log('   │ TEACHER 2: emma.wilson@englishplatform.com                                 │')
     console.log('   │   - Name: Emma Wilson                                                      │')
     console.log('   │   - Rate: $35/hour                                                         │')
-    console.log('   │   - Specialties: IELTS Preparation, Academic English                       │')
+    console.log('   │   - Specialties: IELTS Preparation, Academic English, Writing, Grammar     │')
     console.log('   │   - Password: demo123                                                      │')
     console.log('   │   - Email Verified: ✅ Yes                                                │')
     console.log('   │   - Availability: Mon-Fri, 2:00 PM - 8:00 PM                              │')
@@ -371,37 +399,36 @@ async function main() {
     console.log('   │ TEACHER 3: david.chen@englishplatform.com                                  │')
     console.log('   │   - Name: David Chen                                                       │')
     console.log('   │   - Rate: $28/hour                                                         │')
-    console.log('   │   - Specialties: Pronunciation, Accent Reduction                         │')
+    console.log('   │   - Specialties: Pronunciation, Accent Reduction, Public Speaking          │')
     console.log('   │   - Password: demo123                                                      │')
     console.log('   │   - Email Verified: ✅ Yes                                                │')
     console.log('   │   - Availability: Mon-Fri, 6:00 PM - 10:00 PM, Weekends 10:00 AM - 6:00 PM   │')
     console.log('   ├─────────────────────────────────────────────────────────────────────────────────┤')
     console.log('   │ STUDENT 1: mike.chen@englishplatform.com                                  │')
     console.log('   │   - Name: Mike Chen                                                        │')
-    console.log('   │   - Level: Intermediate                                                   │')
-    console.log('   │   - Goals: Business English, Conversation                               │')
+    console.log('   │   - Level: Intermediate                                                    │')
+    console.log('   │   - Goals: Business English, Conversation, Accent Reduction               │')
     console.log('   │   - Password: demo123                                                      │')
     console.log('   │   - Email Verified: ✅ Yes                                                │')
     console.log('   ├─────────────────────────────────────────────────────────────────────────────────┤')
     console.log('   │ STUDENT 2: lisa.wang@englishplatform.com                                  │')
     console.log('   │   - Name: Lisa Wang                                                        │')
-    console.log('   │   - Level: Advanced                                                         │')
-    console.log('   │   - Goals: IELTS Preparation, Academic Writing                           │')
+    console.log('   │   - Level: Advanced                                                        │')
+    console.log('   │   - Goals: IELTS Preparation, Academic Writing                             │')
     console.log('   │   - Password: demo123                                                      │')
     console.log('   │   - Email Verified: ✅ Yes                                                │')
     console.log('   ├─────────────────────────────────────────────────────────────────────────────────┤')
     console.log('   │ STUDENT 3: carlos.rodriguez@englishplatform.com                            │')
-    console.log('   │   - Name: Carlos Rodriguez                                                 │')
+    console.log('   │   - Name: Carlos Rodriguez                                                │')
     console.log('   │   - Level: Beginner                                                        │')
     console.log('   │   - Goals: Basic Conversation, Travel English                             │')
     console.log('   │   - Password: demo123                                                      │')
     console.log('   │   - Email Verified: ✅ Yes                                                │')
     console.log('   └─────────────────────────────────────────────────────────────────────────────────┘')
     console.log('')
-    console.log('🔐 All users have email verified = true, so no email verification is required!')
-    console.log('🌐 Admin Dashboard: /dashboard/admin')
-    console.log('📚 Teacher Dashboard: /dashboard/teacher')
-    console.log('📖 Student Dashboard: /dashboard/student')
+    console.log('🔐 You can now login with these credentials!')
+    console.log('📝 All users have email verified = true, so no email verification is required.')
+    console.log('🌐 Access the admin dashboard at: /dashboard/admin')
 
   } catch (error) {
     console.error('❌ Error seeding database:', error)
