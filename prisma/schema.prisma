@@ -61,6 +61,8 @@ model User {
   receivedMessages   Message[] @relation("ReceivedMessages")
   
   @@map("users")
+  @@index([email])
+  @@index([role])
 }
 
 model Account {
@@ -226,6 +228,10 @@ model Booking {
   payments Payment[]
 
   @@map("bookings")
+  @@index([studentId])
+  @@index([teacherId])
+  @@index([status])
+  @@index([startTime])
 }
 
 model Payment {
@@ -283,4 +289,7 @@ model Message {
   receiver User   @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
 
   @@map("messages")
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([createdAt])
 }

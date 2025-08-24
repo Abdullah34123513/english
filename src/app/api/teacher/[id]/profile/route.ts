@@ -64,7 +64,7 @@ export async function GET(
       image: teacher.user.image,
       bio: teacher.bio,
       experience: teacher.experience,
-      specialties: teacher.specialties,
+      specializations: teacher.specializations,
       hourlyRate: teacher.hourlyRate,
       country: teacher.country,
       timezone: teacher.timezone,

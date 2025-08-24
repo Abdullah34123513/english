@@ -74,7 +74,16 @@ export async function POST(request: NextRequest) {
       }, { status: 404 })
     }
 
-    const { teacherId, startTime, endTime } = await request.json()
+    const { 
+      teacherId, 
+      startTime, 
+      endTime,
+      lessonType,
+      lessonTopic,
+      specialRequirements,
+      studentLevel,
+      preferredLanguage
+    } = await request.json()
 
     console.log("Booking request:", { teacherId, startTime, endTime, studentId: studentProfile.id })
 
@@ -151,6 +160,7 @@ export async function POST(request: NextRequest) {
         startTime: bookingStart.toISOString(),
         endTime: bookingEnd.toISOString(),
         status: BookingStatus.PENDING,
+        notes: lessonTopic ? `Lesson Type: ${lessonType}, Topic: ${lessonTopic}, Level: ${studentLevel}, Language: ${preferredLanguage}, Special Requirements: ${specialRequirements}` : null,
       },
       include: {
         teacher: {

@@ -15,7 +15,8 @@ export function useSocket({ userId }: UseSocketProps) {
     // Initialize socket connection
     socketRef.current = io(process.env.NODE_ENV === "production" ? "" : "http://localhost:3000", {
       path: "/api/socket/io",
-      addTrailingSlash: false
+      addTrailingSlash: false,
+      transports: ['websocket', 'polling']
     })
 
     const socket = socketRef.current
