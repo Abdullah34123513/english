@@ -19,7 +19,7 @@ import { useToast } from "@/hooks/use-toast"
 import { 
   User, 
   Mail, 
-  Calendar, 
+  Calendar as CalendarIcon, 
   Star, 
   Clock, 
   MapPin, 
@@ -549,7 +549,7 @@ export default function TeacherProfilePage({ params }: { params: Promise<{ id: s
                 )}
                 {teacher.joinedDate && (
                   <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                    <Calendar className="h-5 w-5 text-orange-600" />
+                    <CalendarIcon className="h-5 w-5 text-orange-600" />
                     <div>
                       <p className="text-sm font-medium text-gray-700">Joined</p>
                       <p className="text-gray-900">{new Date(teacher.joinedDate).toLocaleDateString()}</p>
