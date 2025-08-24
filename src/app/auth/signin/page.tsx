@@ -26,6 +26,7 @@ import {
   Key
 } from "lucide-react"
 import { motion } from "framer-motion"
+import Link from "next/link"
 
 function SignInContent() {
   const [email, setEmail] = useState("")
@@ -39,7 +40,6 @@ function SignInContent() {
     isExpired: boolean
   } | null>(null)
   const [resendLoading, setResendLoading] = useState(false)
-  const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false)
   const [message, setMessage] = useState("")
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -137,37 +137,6 @@ function SignInContent() {
 
   const handleGoogleSignIn = () => {
     signIn("google", { callbackUrl: "/" })
-  }
-
-  const handleForgotPassword = async () => {
-    if (!email) {
-      setError("Please enter your email address first")
-      return
-    }
-
-    setForgotPasswordLoading(true)
-    try {
-      const response = await fetch('/api/forgot-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      })
-
-      const data = await response.json()
-
-      if (response.ok) {
-        setMessage(data.message || "Password reset link sent to your email if account exists.")
-        setError("")
-      } else {
-        setError(data.error || "Failed to send password reset email")
-      }
-    } catch (error) {
-      setError("An error occurred while sending password reset email")
-    } finally {
-      setForgotPasswordLoading(false)
-    }
   }
 
   return (
@@ -387,24 +356,13 @@ function SignInContent() {
                     transition={{ delay: 0.65, duration: 0.5 }}
                     className="text-right"
                   >
-                    <button
-                      type="button"
-                      onClick={handleForgotPassword}
-                      disabled={forgotPasswordLoading || !email}
+                    <Link 
+                      href="/auth/forgot-password"
                       className="text-sm text-blue-600 hover:text-blue-700 font-medium inline-flex items-center"
                     >
-                      {forgotPasswordLoading ? (
-                        <>
-                          <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-                          Sending...
-                        </>
-                      ) : (
-                        <>
-                          <Key className="mr-1 h-3 w-3" />
-                          Forgot Password?
-                        </>
-                      )}
-                    </button>
+                      <Key className="mr-1 h-3 w-3" />
+                      Forgot Password?
+                    </Link>
                   </motion.div>
 
                   {/* Error Alert */}
