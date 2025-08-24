@@ -492,7 +492,11 @@ The English Learning Platform Team
   }
 
   isConfigured(): boolean {
-    return this.transporter !== null
+    // Check both transporter and environment variables
+    const hasEnvVars = process.env.SMTP_HOST && 
+                      process.env.SMTP_USER && 
+                      process.env.SMTP_PASS
+    return this.transporter !== null && hasEnvVars
   }
 }
 
