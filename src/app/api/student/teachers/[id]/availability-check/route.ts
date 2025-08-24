@@ -6,9 +6,10 @@ import { BookingStatus } from "@prisma/client"
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params
     const session = await getServerSession(authOptions)
     
     if (!session || session.user.role !== "STUDENT") {
