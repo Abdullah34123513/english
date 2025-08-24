@@ -9,6 +9,13 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Calendar } from "@/components/ui/calendar"
+import { format } from "date-fns"
+import { useToast } from "@/hooks/use-toast"
 import { 
   User, 
   Mail, 
@@ -92,12 +99,19 @@ export default function TeacherProfilePage({ params }: { params: Promise<{ id: s
   const [reviews, setReviews] = useState<Review[]>([])
   const [loading, setLoading] = useState(true)
   const [bookingLoading, setBookingLoading] = useState(false)
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
+  const [selectedDate, setSelectedDate] = useState<Date>()
+  const [selectedTime, setSelectedTime] = useState("")
+  const [selectedDuration, setSelectedDuration] = useState(60)
+  const [teacherAvailability, setTeacherAvailability] = useState<any[]>([])
+  const { toast } = useToast()
 
   useEffect(() => {
     if (teacherId) {
       Promise.all([
         fetchTeacherProfile(),
-        fetchTeacherReviews()
+        fetchTeacherReviews(),
+        fetchTeacherAvailability()
       ]).finally(() => {
         setLoading(false)
       })
@@ -134,6 +148,20 @@ export default function TeacherProfilePage({ params }: { params: Promise<{ id: s
     }
   }
 
+  const fetchTeacherAvailability = async () => {
+    try {
+      const response = await fetch(`/api/teacher/${teacherId}/availability`)
+      if (response.ok) {
+        const data = await response.json()
+        setTeacherAvailability(data)
+      } else {
+        console.error("Failed to fetch teacher availability:", response.status, response.statusText)
+      }
+    } catch (error) {
+      console.error("Failed to fetch teacher availability:", error)
+    }
+  }
+
   const handleBookLesson = async () => {
     if (!session) {
       router.push(`/auth/signin?callbackUrl=/teachers/${teacherId}`)
@@ -141,13 +169,38 @@ export default function TeacherProfilePage({ params }: { params: Promise<{ id: s
     }
 
     if (session.user.role !== "STUDENT") {
-      alert("Only students can book lessons")
+      toast({
+        title: "Access Denied",
+        description: "Only students can book lessons",
+        variant: "destructive"
+      })
+      return
+    }
+
+    setIsBookingModalOpen(true)
+  }
+
+  const handleBookingSubmit = async () => {
+    if (!selectedDate || !selectedTime || !selectedDuration) {
+      toast({
+        title: "Missing Information",
+        description: "Please select date, time, and duration for the lesson",
+        variant: "destructive"
+      })
       return
     }
 
     setBookingLoading(true)
     try {
-      // Create a booking
+      // Create start and end times
+      const [hours, minutes] = selectedTime.split(':')
+      const startTime = new Date(selectedDate)
+      startTime.setHours(parseInt(hours), parseInt(minutes), 0, 0)
+      
+      const endTime = new Date(startTime)
+      endTime.setMinutes(startTime.getMinutes() + selectedDuration)
+
+      // Create booking
       const response = await fetch("/api/student/bookings", {
         method: "POST",
         headers: {
@@ -155,19 +208,79 @@ export default function TeacherProfilePage({ params }: { params: Promise<{ id: s
         },
         body: JSON.stringify({
           teacherId: teacherId,
-          date: new Date().toISOString().split('T')[0], // Today's date
-          time: "10:00", // Default time
-          duration: 60, // 60 minutes
+          startTime: startTime.toISOString(),
+          endTime: endTime.toISOString(),
         }),
       })
 
+      const data = await response.json()
+
       if (response.ok) {
+        toast({
+          title: "Booking Successful",
+          description: "Your lesson has been booked successfully!",
+        })
+        setIsBookingModalOpen(false)
+        setSelectedDate(undefined)
+        setSelectedTime("")
+        setSelectedDuration(60)
         router.push("/dashboard/student")
+      } else {
+        toast({
+          title: "Booking Failed",
+          description: data.error || "Failed to book lesson",
+          variant: "destructive"
+        })
       }
     } catch (error) {
       console.error("Failed to book lesson:", error)
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred while booking",
+        variant: "destructive"
+      })
     } finally {
       setBookingLoading(false)
+    }
+  }
+
+  const handleMessageTeacher = () => {
+    if (!session) {
+      router.push(`/auth/signin?callbackUrl=/teachers/${teacherId}`)
+      return
+    }
+
+    if (session.user.role !== "STUDENT") {
+      toast({
+        title: "Access Denied",
+        description: "Only students can message teachers",
+        variant: "destructive"
+      })
+      return
+    }
+
+    // For now, redirect to messages page or show a toast
+    toast({
+      title: "Messaging",
+      description: "Messaging feature coming soon! Please use the contact form.",
+    })
+  }
+
+  const handleShareProfile = () => {
+    const url = window.location.href
+    if (navigator.share) {
+      navigator.share({
+        title: `${teacher?.name} - Teacher Profile`,
+        text: `Check out ${teacher?.name}'s teacher profile`,
+        url: url,
+      })
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(url)
+      toast({
+        title: "Link Copied",
+        description: "Profile link has been copied to clipboard",
+      })
     }
   }
 
@@ -180,6 +293,52 @@ export default function TeacherProfilePage({ params }: { params: Promise<{ id: s
         }`}
       />
     ))
+  }
+
+  const generateTimeSlots = () => {
+    const slots = []
+    for (let hour = 8; hour <= 20; hour++) {
+      for (let minute = 0; minute < 60; minute += 30) {
+        const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`
+        slots.push(time)
+      }
+    }
+    return slots
+  }
+
+  const getAvailableTimeSlots = () => {
+    if (!selectedDate || teacherAvailability.length === 0) {
+      return generateTimeSlots()
+    }
+
+    const dayOfWeek = selectedDate.getDay()
+    const dayAvailability = teacherAvailability.filter(avail => avail.dayOfWeek === dayOfWeek)
+    
+    if (dayAvailability.length === 0) {
+      return []
+    }
+
+    const availableSlots = []
+    for (const avail of dayAvailability) {
+      const [startHour, startMinute] = avail.startTime.split(':').map(Number)
+      const [endHour, endMinute] = avail.endTime.split(':').map(Number)
+      
+      let currentHour = startHour
+      let currentMinute = startMinute
+      
+      while (currentHour < endHour || (currentHour === endHour && currentMinute < endMinute)) {
+        const time = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`
+        availableSlots.push(time)
+        
+        currentMinute += 30
+        if (currentMinute >= 60) {
+          currentMinute = 0
+          currentHour++
+        }
+      }
+    }
+    
+    return availableSlots
   }
 
   const getStatCards = (): StatCard[] => {
@@ -286,23 +445,27 @@ export default function TeacherProfilePage({ params }: { params: Promise<{ id: s
               </h1>
             </div>
             <div className="flex items-center space-x-4">
-              <Button 
-                onClick={handleBookLesson}
-                disabled={bookingLoading}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg"
-              >
-                {bookingLoading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Booking...
-                  </>
-                ) : (
-                  <>
-                    <CalendarCheck className="h-4 w-4 mr-2" />
-                    Book Lesson
-                  </>
-                )}
-              </Button>
+              <Dialog open={isBookingModalOpen} onOpenChange={setIsBookingModalOpen}>
+                <DialogTrigger asChild>
+                  <Button 
+                    onClick={handleBookLesson}
+                    disabled={bookingLoading}
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg"
+                  >
+                    {bookingLoading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Booking...
+                      </>
+                    ) : (
+                      <>
+                        <CalendarCheck className="h-4 w-4 mr-2" />
+                        Book Lesson
+                      </>
+                    )}
+                  </Button>
+                </DialogTrigger>
+              </Dialog>
             </div>
           </div>
         </div>
@@ -418,19 +581,93 @@ export default function TeacherProfilePage({ params }: { params: Promise<{ id: s
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
+                <Dialog open={isBookingModalOpen} onOpenChange={setIsBookingModalOpen}>
+                  <DialogTrigger asChild>
+                    <Button 
+                      onClick={handleBookLesson}
+                      disabled={bookingLoading}
+                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                    >
+                      <CalendarCheck className="h-4 w-4 mr-2" />
+                      Book a Lesson
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle>Book a Lesson with {teacher?.name}</DialogTitle>
+                      <DialogDescription>
+                        Select your preferred date, time, and duration for the lesson.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="date">Date</Label>
+                        <Calendar
+                          mode="single"
+                          selected={selectedDate}
+                          onSelect={setSelectedDate}
+                          disabled={(date) => date < new Date() || date.getDay() === 0 || date.getDay() === 6}
+                          className="rounded-md border"
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="time">Time</Label>
+                        <Select value={selectedTime} onValueChange={setSelectedTime}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a time" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {getAvailableTimeSlots().map((time) => (
+                              <SelectItem key={time} value={time}>
+                                {time}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="duration">Duration (minutes)</Label>
+                        <Select value={selectedDuration.toString()} onValueChange={(value) => setSelectedDuration(parseInt(value))}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="30">30 minutes</SelectItem>
+                            <SelectItem value="60">60 minutes</SelectItem>
+                            <SelectItem value="90">90 minutes</SelectItem>
+                            <SelectItem value="120">120 minutes</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      {teacher?.hourlyRate && (
+                        <div className="text-sm text-gray-600">
+                          Estimated cost: ${(teacher.hourlyRate * selectedDuration / 60).toFixed(2)}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex justify-end space-x-2">
+                      <Button variant="outline" onClick={() => setIsBookingModalOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button onClick={handleBookingSubmit} disabled={bookingLoading || !selectedDate || !selectedTime}>
+                        {bookingLoading ? "Booking..." : "Confirm Booking"}
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
                 <Button 
-                  onClick={handleBookLesson}
-                  disabled={bookingLoading}
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                  variant="outline" 
+                  className="w-full border-gray-300 hover:bg-gray-50"
+                  onClick={handleMessageTeacher}
                 >
-                  <CalendarCheck className="h-4 w-4 mr-2" />
-                  Book a Lesson
-                </Button>
-                <Button variant="outline" className="w-full border-gray-300 hover:bg-gray-50">
                   <MessageCircle className="h-4 w-4 mr-2" />
                   Send Message
                 </Button>
-                <Button variant="outline" className="w-full border-gray-300 hover:bg-gray-50">
+                <Button 
+                  variant="outline" 
+                  className="w-full border-gray-300 hover:bg-gray-50"
+                  onClick={handleShareProfile}
+                >
                   <Share2 className="h-4 w-4 mr-2" />
                   Share Profile
                 </Button>
