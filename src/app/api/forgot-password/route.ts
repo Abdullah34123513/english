@@ -19,6 +19,14 @@ export async function POST(request: NextRequest) {
       where: { email }
     })
 
+    // Debug logging (remove in production)
+    console.log('Forgot password request for email:', email)
+    console.log('User found:', !!user)
+    if (user) {
+      console.log('User has password:', !!user.password)
+      console.log('User email verified:', user.emailVerified)
+    }
+
     // Always return a success message to prevent email enumeration
     // But only send email if user exists and has a password (credentials provider)
     if (user && user.password) {
@@ -47,14 +55,19 @@ export async function POST(request: NextRequest) {
       })
 
       // Send password reset email
+      console.log('Attempting to send password reset email to:', user.email)
       const emailSent = await emailService.sendPasswordResetEmail(
         user.email,
         resetToken,
         user.name || undefined
       )
 
+      console.log('Email sent result:', emailSent)
+
       if (!emailSent) {
         console.error('Failed to send password reset email to:', user.email)
+      } else {
+        console.log('Password reset email sent successfully to:', user.email)
       }
     }
 
