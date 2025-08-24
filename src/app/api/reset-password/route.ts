@@ -20,14 +20,38 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Dynamically import the database client to avoid potential import issues
-    const { db } = await import('@/lib/db')
+    // Get database client with verification
+    let db
+    try {
+      const { getDbClient } = await import('@/lib/db')
+      db = await getDbClient()
+      
+      // Verify database models are available
+      if (!db.passwordReset || !db.user) {
+        throw new Error('Database models not available')
+      }
+    } catch (dbError) {
+      console.error('Database initialization error:', dbError)
+      return NextResponse.json(
+        { error: 'Database connection failed. Please try again later.' },
+        { status: 500 }
+      )
+    }
 
-    // Find the password reset record
-    const resetRecord = await db.passwordReset.findUnique({
-      where: { token },
-      include: { user: true }
-    })
+    // Find the password reset record with additional error handling
+    let resetRecord
+    try {
+      resetRecord = await db.passwordReset.findUnique({
+        where: { token },
+        include: { user: true }
+      })
+    } catch (queryError) {
+      console.error('Database query error:', queryError)
+      return NextResponse.json(
+        { error: 'Failed to validate reset token. Please try again.' },
+        { status: 500 }
+      )
+    }
 
     if (!resetRecord) {
       return NextResponse.json(
@@ -63,17 +87,30 @@ export async function POST(request: NextRequest) {
     // Hash the new password
     const hashedPassword = await bcrypt.hash(password, 12)
 
-    // Update user's password
-    await db.user.update({
-      where: { id: resetRecord.userId },
-      data: { password: hashedPassword }
-    })
+    // Update user's password with error handling
+    try {
+      await db.user.update({
+        where: { id: resetRecord.userId },
+        data: { password: hashedPassword }
+      })
+    } catch (updateError) {
+      console.error('Failed to update user password:', updateError)
+      return NextResponse.json(
+        { error: 'Failed to update password. Please try again.' },
+        { status: 500 }
+      )
+    }
 
-    // Mark the reset token as used
-    await db.passwordReset.update({
-      where: { id: resetRecord.id },
-      data: { used: true }
-    })
+    // Mark the reset token as used with error handling
+    try {
+      await db.passwordReset.update({
+        where: { id: resetRecord.id },
+        data: { used: true }
+      })
+    } catch (updateError) {
+      console.error('Failed to mark reset token as used:', updateError)
+      // Don't fail the whole operation if this fails, but log it
+    }
 
     return NextResponse.json({
       message: 'Password has been reset successfully'
