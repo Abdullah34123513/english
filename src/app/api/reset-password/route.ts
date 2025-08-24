@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
 import bcrypt from 'bcryptjs'
 
 export async function POST(request: NextRequest) {
@@ -20,6 +19,9 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
+
+    // Dynamically import the database client to avoid potential import issues
+    const { db } = await import('@/lib/db')
 
     // Find the password reset record
     const resetRecord = await db.passwordReset.findUnique({

@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
-import { emailService } from '@/lib/email-service'
 import crypto from 'crypto'
 
 export async function POST(request: NextRequest) {
@@ -13,6 +11,10 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
+
+    // Dynamically import dependencies to avoid potential import issues
+    const { db } = await import('@/lib/db')
+    const { emailService } = await import('@/lib/email-service')
 
     // Check if database is accessible
     try {
