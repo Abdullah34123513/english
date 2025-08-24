@@ -152,7 +152,7 @@ export async function POST(request: NextRequest) {
     if (testType === 'password_reset' && user && user.password) {
       try {
         console.log('Attempting to send password reset email to:', email)
-        const crypto = require('crypto')
+        const crypto = await import('crypto')
         const resetToken = crypto.randomBytes(32).toString('hex')
         
         const resetResult = await emailService.sendPasswordResetEmail(
