@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -10,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Calendar } from "@/components/ui/calendar"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { BookingConfirmationPopup } from "./booking-confirmation-popup"
+import { MessageModal } from "@/components/messaging/message-modal"
 import { ValidationError, BookingError, handleUnknownError } from "@/lib/custom-error"
 import { createLogger } from "@/lib/logger"
 import { 
@@ -76,6 +78,7 @@ interface EnhancedTeacherCardProps {
 
 export function EnhancedTeacherCard({ teacher, studentId, onBookClass, onSubmitPayment }: EnhancedTeacherCardProps) {
   const router = useRouter()
+  const { data: session } = useSession()
   const [selectedDate, setSelectedDate] = useState<Date>()
   const [selectedTime, setSelectedTime] = useState("")
   const [bookingLoading, setBookingLoading] = useState(false)
@@ -84,6 +87,7 @@ export function EnhancedTeacherCard({ teacher, studentId, onBookClass, onSubmitP
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [showPaymentPopup, setShowPaymentPopup] = useState(false)
   const [pendingBooking, setPendingBooking] = useState<any>(null)
+  const [isMessageModalOpen, setIsMessageModalOpen] = useState(false)
 
   // Cleanup effect to reset state when component unmounts
   useEffect(() => {
@@ -764,6 +768,19 @@ export function EnhancedTeacherCard({ teacher, studentId, onBookClass, onSubmitP
             </DialogContent>
           </Dialog>
           
+          {/* Message Button */}
+          <Button 
+            variant="outline" 
+            className="w-full border-gray-300 hover:border-blue-300 text-gray-700 hover:text-blue-600 font-medium transition-all duration-200 group relative overflow-hidden mb-3"
+            onClick={() => setIsMessageModalOpen(true)}
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 opacity-0 group-hover:opacity-5 transition-opacity"></div>
+            <div className="relative flex items-center justify-center">
+              <MessageCircle className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
+              Send Message
+            </div>
+          </Button>
+          
           <Button 
             variant="outline" 
             className="w-full border-gray-300 hover:border-blue-300 text-gray-700 hover:text-blue-600 font-medium transition-all duration-200 group relative overflow-hidden"
@@ -792,6 +809,26 @@ export function EnhancedTeacherCard({ teacher, studentId, onBookClass, onSubmitP
         }}
         bookingData={pendingBooking}
         onConfirm={handlePaymentConfirmation}
+      />
+    )}
+
+    {/* Message Modal */}
+    {session && (
+      <MessageModal
+        isOpen={isMessageModalOpen}
+        onClose={() => setIsMessageModalOpen(false)}
+        currentUser={{
+          id: session.user.id,
+          name: session.user.name || "Student",
+          image: session.user.image,
+          role: session.user.role
+        }}
+        otherUser={{
+          id: teacher.user.id,
+          name: teacher.user.name,
+          image: teacher.user.image,
+          role: "TEACHER"
+        }}
       />
     )}
     </>

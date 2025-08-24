@@ -63,7 +63,7 @@ export function MessageModal({ isOpen, onClose, currentUser, otherUser }: Messag
   const [isTyping, setIsTyping] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const { toast } = useToast()
-  const { isConnected, sendMessage: sendSocketMessage, sendTyping, stopTyping, onNewMessage, onMessageSent, onUserTyping, onUserStoppedTyping } = useSocket({ userId: currentUser.id })
+  const { isConnected, sendMessage: sendSocketMessage, sendTyping, stopTyping, onNewMessage, onMessageSent, onUserTyping, onUserStoppedTyping, offNewMessage, offMessageSent, offUserTyping, offUserStoppedTyping } = useSocket({ userId: currentUser.id })
 
   useEffect(() => {
     if (isOpen) {
