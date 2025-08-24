@@ -20,25 +20,29 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Get database client with verification
+    // Import database client
     let db
     try {
-      const { getDbClient } = await import('@/lib/db')
-      db = await getDbClient()
+      const dbModule = await import('@/lib/db')
+      db = dbModule.db
       
-      // Verify database models are available
-      if (!db.passwordReset || !db.user) {
-        throw new Error('Database models not available')
+      // Test database connection
+      if (!db) {
+        throw new Error('Database client not available')
       }
+      
+      // Test basic database operation
+      await db.user.findFirst({ take: 1 })
+      
     } catch (dbError) {
-      console.error('Database initialization error:', dbError)
+      console.error('Database connection error:', dbError)
       return NextResponse.json(
         { error: 'Database connection failed. Please try again later.' },
         { status: 500 }
       )
     }
 
-    // Find the password reset record with additional error handling
+    // Find the password reset record
     let resetRecord
     try {
       resetRecord = await db.passwordReset.findUnique({
@@ -87,7 +91,7 @@ export async function POST(request: NextRequest) {
     // Hash the new password
     const hashedPassword = await bcrypt.hash(password, 12)
 
-    // Update user's password with error handling
+    // Update user's password
     try {
       await db.user.update({
         where: { id: resetRecord.userId },
@@ -101,7 +105,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Mark the reset token as used with error handling
+    // Mark the reset token as used
     try {
       await db.passwordReset.update({
         where: { id: resetRecord.id },
