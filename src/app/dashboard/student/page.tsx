@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { 
   Calendar, 
   Clock, 
@@ -26,6 +27,7 @@ import {
   BarChart3,
   CheckCircle,
   AlertCircle,
+  AlertTriangle,
   User
 } from "lucide-react"
 import { TeacherList } from "@/components/student/teacher-list"
@@ -66,16 +68,35 @@ export default function StudentDashboard() {
         setStudentData(studentDataWithStats)
       } else {
         // Handle error response
-        console.error("Failed to fetch student data:", response.status)
-        setStudentData({
-          bookings: [],
-          statistics: {
-            totalClasses: 0,
-            upcomingClasses: 0,
-            moneySpent: 0,
-            learningStreak: 0
-          }
-        })
+        const errorData = await response.json()
+        console.error("Failed to fetch student data:", response.status, errorData)
+        
+        // Check if it's a profile not found error
+        if (response.status === 404 && errorData.requiresProfile) {
+          // Show a user-friendly message for missing profile
+          setStudentData({
+            bookings: [],
+            statistics: {
+              totalClasses: 0,
+              upcomingClasses: 0,
+              moneySpent: 0,
+              learningStreak: 0
+            },
+            profileIncomplete: true,
+            profileMessage: errorData.message || "Please complete your student profile to access all features"
+          })
+        } else {
+          // Handle other errors
+          setStudentData({
+            bookings: [],
+            statistics: {
+              totalClasses: 0,
+              upcomingClasses: 0,
+              moneySpent: 0,
+              learningStreak: 0
+            }
+          })
+        }
       }
     } catch (error) {
       console.error("Error fetching student data:", error)
@@ -138,6 +159,31 @@ export default function StudentDashboard() {
           </div>
         </div>
       </header>
+
+      {/* Profile Completion Alert */}
+      {studentData?.profileIncomplete && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <Alert className="border-orange-200 bg-orange-50">
+            <AlertTriangle className="h-4 w-4 text-orange-600" />
+            <AlertDescription className="text-orange-800">
+              {studentData.profileMessage}
+            </AlertDescription>
+            <div className="mt-2">
+              <Button 
+                size="sm" 
+                variant="outline" 
+                className="border-orange-300 text-orange-700 hover:bg-orange-100"
+                onClick={() => {
+                  // TODO: Navigate to profile completion page
+                  console.log('Navigate to profile completion')
+                }}
+              >
+                Complete Profile
+              </Button>
+            </div>
+          </Alert>
+        </div>
+      )}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Section */}
