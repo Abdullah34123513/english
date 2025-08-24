@@ -13,8 +13,13 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Calendar } from "@/components/ui/calendar"
 import { format } from "date-fns"
+import { MessageModal } from "@/components/messaging/message-modal"
 import { useToast } from "@/hooks/use-toast"
 import { 
   User, 
@@ -104,6 +109,12 @@ export default function TeacherProfilePage({ params }: { params: Promise<{ id: s
   const [selectedTime, setSelectedTime] = useState("")
   const [selectedDuration, setSelectedDuration] = useState(60)
   const [teacherAvailability, setTeacherAvailability] = useState<any[]>([])
+  const [lessonType, setLessonType] = useState("general")
+  const [lessonTopic, setLessonTopic] = useState("")
+  const [specialRequirements, setSpecialRequirements] = useState("")
+  const [studentLevel, setStudentLevel] = useState("beginner")
+  const [preferredLanguage, setPreferredLanguage] = useState("english")
+  const [isMessageModalOpen, setIsMessageModalOpen] = useState(false)
   const { toast } = useToast()
 
   useEffect(() => {
@@ -200,17 +211,24 @@ export default function TeacherProfilePage({ params }: { params: Promise<{ id: s
       const endTime = new Date(startTime)
       endTime.setMinutes(startTime.getMinutes() + selectedDuration)
 
-      // Create booking
+      // Create booking with enhanced details
+      const bookingData = {
+        teacherId: teacherId,
+        startTime: startTime.toISOString(),
+        endTime: endTime.toISOString(),
+        lessonType,
+        lessonTopic,
+        specialRequirements,
+        studentLevel,
+        preferredLanguage
+      }
+
       const response = await fetch("/api/student/bookings", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          teacherId: teacherId,
-          startTime: startTime.toISOString(),
-          endTime: endTime.toISOString(),
-        }),
+        body: JSON.stringify(bookingData),
       })
 
       const data = await response.json()
@@ -218,12 +236,18 @@ export default function TeacherProfilePage({ params }: { params: Promise<{ id: s
       if (response.ok) {
         toast({
           title: "Booking Successful",
-          description: "Your lesson has been booked successfully!",
+          description: "Your lesson has been booked successfully! The teacher will be notified.",
         })
         setIsBookingModalOpen(false)
+        // Reset form
         setSelectedDate(undefined)
         setSelectedTime("")
         setSelectedDuration(60)
+        setLessonType("general")
+        setLessonTopic("")
+        setSpecialRequirements("")
+        setStudentLevel("beginner")
+        setPreferredLanguage("english")
         router.push("/dashboard/student")
       } else {
         toast({
@@ -259,11 +283,7 @@ export default function TeacherProfilePage({ params }: { params: Promise<{ id: s
       return
     }
 
-    // For now, redirect to messages page or show a toast
-    toast({
-      title: "Messaging",
-      description: "Messaging feature coming soon! Please use the contact form.",
-    })
+    setIsMessageModalOpen(true)
   }
 
   const handleShareProfile = () => {
@@ -592,65 +612,229 @@ export default function TeacherProfilePage({ params }: { params: Promise<{ id: s
                       Book a Lesson
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px]">
+                  <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle>Book a Lesson with {teacher?.name}</DialogTitle>
                       <DialogDescription>
-                        Select your preferred date, time, and duration for the lesson.
+                        Fill in the details below to schedule your lesson. All fields marked with * are required.
                       </DialogDescription>
                     </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                      <div className="grid gap-2">
-                        <Label htmlFor="date">Date</Label>
-                        <Calendar
-                          mode="single"
-                          selected={selectedDate}
-                          onSelect={setSelectedDate}
-                          disabled={(date) => date < new Date() || date.getDay() === 0 || date.getDay() === 6}
-                          className="rounded-md border"
-                        />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label htmlFor="time">Time</Label>
-                        <Select value={selectedTime} onValueChange={setSelectedTime}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a time" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {getAvailableTimeSlots().map((time) => (
-                              <SelectItem key={time} value={time}>
-                                {time}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="grid gap-2">
-                        <Label htmlFor="duration">Duration (minutes)</Label>
-                        <Select value={selectedDuration.toString()} onValueChange={(value) => setSelectedDuration(parseInt(value))}>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="30">30 minutes</SelectItem>
-                            <SelectItem value="60">60 minutes</SelectItem>
-                            <SelectItem value="90">90 minutes</SelectItem>
-                            <SelectItem value="120">120 minutes</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      {teacher?.hourlyRate && (
-                        <div className="text-sm text-gray-600">
-                          Estimated cost: ${(teacher.hourlyRate * selectedDuration / 60).toFixed(2)}
-                        </div>
+                    
+                    <div className="grid gap-6 py-4">
+                      {/* Scheduling Section */}
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-lg flex items-center">
+                            <CalendarIcon className="h-5 w-5 mr-2" />
+                            Schedule & Timing
+                          </CardTitle>
+                          <CardDescription>
+                            Choose when you'd like to have your lesson
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent className="grid gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="grid gap-2">
+                              <Label htmlFor="date">Date *</Label>
+                              <Calendar
+                                mode="single"
+                                selected={selectedDate}
+                                onSelect={setSelectedDate}
+                                disabled={(date) => date < new Date() || date.getDay() === 0 || date.getDay() === 6}
+                                className="rounded-md border"
+                              />
+                            </div>
+                            <div className="grid gap-2">
+                              <div>
+                                <Label htmlFor="time">Time *</Label>
+                                <Select value={selectedTime} onValueChange={setSelectedTime}>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select a time" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {getAvailableTimeSlots().map((time) => (
+                                      <SelectItem key={time} value={time}>
+                                        {time}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div>
+                                <Label htmlFor="duration">Duration *</Label>
+                                <Select value={selectedDuration.toString()} onValueChange={(value) => setSelectedDuration(parseInt(value))}>
+                                  <SelectTrigger>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="30">30 minutes</SelectItem>
+                                    <SelectItem value="60">60 minutes</SelectItem>
+                                    <SelectItem value="90">90 minutes</SelectItem>
+                                    <SelectItem value="120">120 minutes</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              {teacher?.hourlyRate && (
+                                <Alert>
+                                  <AlertDescription>
+                                    <strong>Estimated cost:</strong> ${(teacher.hourlyRate * selectedDuration / 60).toFixed(2)}
+                                  </AlertDescription>
+                                </Alert>
+                              )}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {/* Lesson Details Section */}
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-lg flex items-center">
+                            <BookOpen className="h-5 w-5 mr-2" />
+                            Lesson Details
+                          </CardTitle>
+                          <CardDescription>
+                            Tell us about the lesson you'd like to book
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent className="grid gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="grid gap-2">
+                              <Label htmlFor="lessonType">Lesson Type *</Label>
+                              <RadioGroup value={lessonType} onValueChange={setLessonType}>
+                                <div className="flex items-center space-x-2">
+                                  <RadioGroupItem value="general" id="general" />
+                                  <Label htmlFor="general">General English</Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <RadioGroupItem value="business" id="business" />
+                                  <Label htmlFor="business">Business English</Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <RadioGroupItem value="conversation" id="conversation" />
+                                  <Label htmlFor="conversation">Conversation Practice</Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <RadioGroupItem value="exam" id="exam" />
+                                  <Label htmlFor="exam">Exam Preparation</Label>
+                                </div>
+                              </RadioGroup>
+                            </div>
+                            <div className="grid gap-2">
+                              <div>
+                                <Label htmlFor="studentLevel">Your Level *</Label>
+                                <Select value={studentLevel} onValueChange={setStudentLevel}>
+                                  <SelectTrigger>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="beginner">Beginner</SelectItem>
+                                    <SelectItem value="elementary">Elementary</SelectItem>
+                                    <SelectItem value="intermediate">Intermediate</SelectItem>
+                                    <SelectItem value="advanced">Advanced</SelectItem>
+                                    <SelectItem value="proficient">Proficient</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div>
+                                <Label htmlFor="preferredLanguage">Preferred Language *</Label>
+                                <Select value={preferredLanguage} onValueChange={setPreferredLanguage}>
+                                  <SelectTrigger>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="english">English</SelectItem>
+                                    <SelectItem value="arabic">Arabic</SelectItem>
+                                    <SelectItem value="spanish">Spanish</SelectItem>
+                                    <SelectItem value="french">French</SelectItem>
+                                    <SelectItem value="other">Other</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="grid gap-2">
+                            <Label htmlFor="lessonTopic">Specific Topic or Goal (Optional)</Label>
+                            <Input
+                              id="lessonTopic"
+                              placeholder="e.g., Business presentations, IELTS speaking, travel English..."
+                              value={lessonTopic}
+                              onChange={(e) => setLessonTopic(e.target.value)}
+                            />
+                          </div>
+                          <div className="grid gap-2">
+                            <Label htmlFor="specialRequirements">Special Requirements or Notes (Optional)</Label>
+                            <Textarea
+                              id="specialRequirements"
+                              placeholder="Any special needs, learning preferences, or additional information..."
+                              value={specialRequirements}
+                              onChange={(e) => setSpecialRequirements(e.target.value)}
+                              rows={3}
+                            />
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {/* Summary Section */}
+                      {selectedDate && selectedTime && (
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="text-lg">Booking Summary</CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="grid gap-2 text-sm">
+                              <div className="flex justify-between">
+                                <span className="font-medium">Date:</span>
+                                <span>{selectedDate.toLocaleDateString()}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="font-medium">Time:</span>
+                                <span>{selectedTime}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="font-medium">Duration:</span>
+                                <span>{selectedDuration} minutes</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="font-medium">Lesson Type:</span>
+                                <span className="capitalize">{lessonType}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="font-medium">Level:</span>
+                                <span className="capitalize">{studentLevel}</span>
+                              </div>
+                              {teacher?.hourlyRate && (
+                                <div className="flex justify-between font-semibold text-lg border-t pt-2">
+                                  <span>Total Cost:</span>
+                                  <span>${(teacher.hourlyRate * selectedDuration / 60).toFixed(2)}</span>
+                                </div>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
                       )}
                     </div>
-                    <div className="flex justify-end space-x-2">
+                    
+                    <div className="flex justify-between items-center">
                       <Button variant="outline" onClick={() => setIsBookingModalOpen(false)}>
                         Cancel
                       </Button>
-                      <Button onClick={handleBookingSubmit} disabled={bookingLoading || !selectedDate || !selectedTime}>
-                        {bookingLoading ? "Booking..." : "Confirm Booking"}
+                      <Button 
+                        onClick={handleBookingSubmit} 
+                        disabled={bookingLoading || !selectedDate || !selectedTime}
+                        className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                      >
+                        {bookingLoading ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                            Booking...
+                          </>
+                        ) : (
+                          <>
+                            <CalendarCheck className="h-4 w-4 mr-2" />
+                            Confirm Booking
+                          </>
+                        )}
                       </Button>
                     </div>
                   </DialogContent>
@@ -981,6 +1165,26 @@ export default function TeacherProfilePage({ params }: { params: Promise<{ id: s
           </div>
         </div>
       </div>
+
+      {/* Message Modal */}
+      {session && teacher && (
+        <MessageModal
+          isOpen={isMessageModalOpen}
+          onClose={() => setIsMessageModalOpen(false)}
+          currentUser={{
+            id: session.user.id,
+            name: session.user.name || "Student",
+            image: session.user.image,
+            role: session.user.role
+          }}
+          otherUser={{
+            id: teacher.id,
+            name: teacher.name,
+            image: teacher.image,
+            role: "TEACHER"
+          }}
+        />
+      )}
     </div>
   )
 }

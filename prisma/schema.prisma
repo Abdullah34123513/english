@@ -57,6 +57,8 @@ model User {
   sessions           Session[]
   emailVerifications EmailVerification[]
   passwordResets     PasswordReset[]
+  sentMessages       Message[] @relation("SentMessages")
+  receivedMessages   Message[] @relation("ReceivedMessages")
   
   @@map("users")
 }
@@ -266,4 +268,19 @@ model Review {
   booking Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
   @@map("reviews")
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  senderId  String
+  receiverId String
+  content   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sender  User   @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User   @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
 }
