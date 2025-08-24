@@ -35,7 +35,7 @@ function ForgotPasswordContent() {
     setMessage("")
 
     try {
-      const response = await fetch('/api/forgot-password-simple', {
+      const response = await fetch('/api/forgot-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
