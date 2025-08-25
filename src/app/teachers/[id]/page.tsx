@@ -282,6 +282,16 @@ export default function TeacherProfilePage({ params }: { params: Promise<{ id: s
       return
     }
 
+    // Validate teacher data before opening message modal
+    if (!teacher?.id || !teacher?.name) {
+      toast({
+        title: "Error",
+        description: "Invalid teacher information for messaging",
+        variant: "destructive"
+      })
+      return
+    }
+
     setIsMessageModalOpen(true)
   }
 
@@ -1166,7 +1176,7 @@ export default function TeacherProfilePage({ params }: { params: Promise<{ id: s
       </div>
 
       {/* Message Modal */}
-      {session && teacher && (
+      {session && teacher?.id && teacher?.name && (
         <MessageModal
           isOpen={isMessageModalOpen}
           onClose={() => setIsMessageModalOpen(false)}

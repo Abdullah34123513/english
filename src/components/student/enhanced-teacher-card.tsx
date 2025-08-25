@@ -772,7 +772,16 @@ export function EnhancedTeacherCard({ teacher, studentId, onBookClass, onSubmitP
           <Button 
             variant="outline" 
             className="w-full border-gray-300 hover:border-blue-300 text-gray-700 hover:text-blue-600 font-medium transition-all duration-200 group relative overflow-hidden mb-3"
-            onClick={() => setIsMessageModalOpen(true)}
+            onClick={() => {
+              // Validate teacher data before opening message modal
+              if (teacher?.user?.id && teacher?.user?.name) {
+                setIsMessageModalOpen(true);
+              } else {
+                console.error('Invalid teacher data for messaging:', teacher);
+                // You could add a toast here if needed
+              }
+            }}
+            disabled={!teacher?.user?.id || !teacher?.user?.name}
           >
             <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 opacity-0 group-hover:opacity-5 transition-opacity"></div>
             <div className="relative flex items-center justify-center">
@@ -813,7 +822,7 @@ export function EnhancedTeacherCard({ teacher, studentId, onBookClass, onSubmitP
     )}
 
     {/* Message Modal */}
-    {session && (
+    {session && teacher?.user?.id && teacher?.user?.name && (
       <MessageModal
         isOpen={isMessageModalOpen}
         onClose={() => setIsMessageModalOpen(false)}

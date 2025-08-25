@@ -67,9 +67,20 @@ export function MessageModal({ isOpen, onClose, currentUser, otherUser }: Messag
 
   useEffect(() => {
     if (isOpen) {
-      fetchMessages()
+      // Validate that we have valid user IDs before fetching messages
+      if (!currentUser?.id || !otherUser?.id) {
+        console.error('Invalid user IDs for messaging:', { currentUser, otherUser });
+        toast({
+          title: "Error",
+          description: "Invalid user information for messaging",
+          variant: "destructive"
+        });
+        onClose();
+        return;
+      }
+      fetchMessages();
     }
-  }, [isOpen, currentUser.id, otherUser.id])
+  }, [isOpen, currentUser?.id, otherUser?.id])
 
   useEffect(() => {
     scrollToBottom()
@@ -156,6 +167,11 @@ export function MessageModal({ isOpen, onClose, currentUser, otherUser }: Messag
   const fetchMessages = async () => {
     setLoading(true)
     try {
+      // Validate user IDs again before making the request
+      if (!currentUser?.id || !otherUser?.id) {
+        throw new Error('Invalid user IDs for fetching messages');
+      }
+
       const response = await fetch(`/api/messages?userId=${currentUser.id}&otherUserId=${otherUser.id}`)
       if (response.ok) {
         const data = await response.json()
@@ -163,12 +179,15 @@ export function MessageModal({ isOpen, onClose, currentUser, otherUser }: Messag
         
         // Mark messages as read
         await markMessagesAsRead()
+      } else {
+        const error = await response.json()
+        throw new Error(error.error || "Failed to load messages")
       }
     } catch (error) {
       console.error("Error fetching messages:", error)
       toast({
         title: "Error",
-        description: "Failed to load messages",
+        description: error instanceof Error ? error.message : "Failed to load messages",
         variant: "destructive"
       })
     } finally {
@@ -193,6 +212,11 @@ export function MessageModal({ isOpen, onClose, currentUser, otherUser }: Messag
 
     setSending(true)
     try {
+      // Validate user IDs before sending message
+      if (!currentUser?.id || !otherUser?.id) {
+        throw new Error('Invalid user IDs for sending message');
+      }
+
       // Save to database via API
       const response = await fetch("/api/messages", {
         method: "POST",
@@ -220,17 +244,13 @@ export function MessageModal({ isOpen, onClose, currentUser, otherUser }: Messag
         }
       } else {
         const error = await response.json()
-        toast({
-          title: "Error",
-          description: error.error || "Failed to send message",
-          variant: "destructive"
-        })
+        throw new Error(error.error || "Failed to send message")
       }
     } catch (error) {
       console.error("Error sending message:", error)
       toast({
         title: "Error",
-        description: "Failed to send message",
+        description: error instanceof Error ? error.message : "Failed to send message",
         variant: "destructive"
       })
     } finally {

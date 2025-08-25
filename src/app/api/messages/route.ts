@@ -8,20 +8,43 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions)
     
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized - No session found" }, { status: 401 })
     }
 
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get('userId')
     const otherUserId = searchParams.get('otherUserId')
 
+    console.log('GET /api/messages - Request params:', { userId, otherUserId, sessionUserId: session.user.id })
+
     if (!userId || !otherUserId) {
-      return NextResponse.json({ error: "Missing required parameters" }, { status: 400 })
+      return NextResponse.json({ 
+        error: "Missing required parameters", 
+        details: {
+          userId: userId ? 'provided' : 'missing',
+          otherUserId: otherUserId ? 'provided' : 'missing'
+        }
+      }, { status: 400 })
+    }
+
+    // Handle case where otherUserId is "undefined" string
+    if (otherUserId === 'undefined' || otherUserId === 'null') {
+      return NextResponse.json({ 
+        error: "Invalid otherUserId parameter", 
+        details: { otherUserId }
+      }, { status: 400 })
     }
 
     // Verify that the current user is one of the participants
     if (session.user.id !== userId && session.user.id !== otherUserId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({ 
+        error: "Unauthorized - User not part of conversation",
+        details: {
+          sessionUserId: session.user.id,
+          requestedUserId: userId,
+          requestedOtherUserId: otherUserId
+        }
+      }, { status: 401 })
     }
 
     const messages = await db.message.findMany({
@@ -58,10 +81,14 @@ export async function GET(request: NextRequest) {
       }
     })
 
+    console.log('GET /api/messages - Found messages:', { count: messages.length })
     return NextResponse.json(messages)
   } catch (error) {
     console.error("Error fetching messages:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    return NextResponse.json({ 
+      error: "Internal server error",
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
   }
 }
 
@@ -70,13 +97,21 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions)
     
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized - No session found" }, { status: 401 })
     }
 
     const { receiverId, content } = await request.json()
 
+    console.log('POST /api/messages - Request body:', { receiverId, content, senderId: session.user.id })
+
     if (!receiverId || !content) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+      return NextResponse.json({ 
+        error: "Missing required fields", 
+        details: {
+          receiverId: receiverId ? 'provided' : 'missing',
+          content: content ? 'provided' : 'missing'
+        }
+      }, { status: 400 })
     }
 
     if (session.user.id === receiverId) {
@@ -89,7 +124,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (!receiver) {
-      return NextResponse.json({ error: "Receiver not found" }, { status: 404 })
+      return NextResponse.json({ error: "Receiver not found", receiverId }, { status: 404 })
     }
 
     const message = await db.message.create({
@@ -116,9 +151,13 @@ export async function POST(request: NextRequest) {
       }
     })
 
+    console.log('POST /api/messages - Message created successfully:', { messageId: message.id })
     return NextResponse.json(message)
   } catch (error) {
     console.error("Error creating message:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    return NextResponse.json({ 
+      error: "Internal server error",
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
   }
 }
