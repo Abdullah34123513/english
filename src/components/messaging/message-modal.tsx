@@ -193,16 +193,7 @@ export function MessageModal({ isOpen, onClose, currentUser, otherUser }: Messag
 
     setSending(true)
     try {
-      // Send via socket for real-time delivery
-      if (isConnected) {
-        sendSocketMessage({
-          senderId: currentUser.id,
-          receiverId: otherUser.id,
-          content: newMessage.trim()
-        })
-      }
-
-      // Also save to database via API
+      // Save to database via API
       const response = await fetch("/api/messages", {
         method: "POST",
         headers: {
@@ -218,6 +209,15 @@ export function MessageModal({ isOpen, onClose, currentUser, otherUser }: Messag
         const message = await response.json()
         setMessages(prev => [...prev, message])
         setNewMessage("")
+        
+        // Send via socket for real-time delivery (if connected)
+        if (isConnected) {
+          sendSocketMessage({
+            senderId: currentUser.id,
+            receiverId: otherUser.id,
+            content: newMessage.trim()
+          })
+        }
       } else {
         const error = await response.json()
         toast({

@@ -1,82 +1,22 @@
-import { Server } from "socket.io"
-import { NextApiRequest, NextApiResponse } from "next"
+import { NextRequest, NextResponse } from "next/server"
+import { getSocketServer } from "@/lib/socket-server"
 
-export type NextApiResponseServerSocket = NextApiResponse & {
-  socket: {
-    server: {
-      io: Server
-    }
-  }
-}
+export const dynamic = "force-dynamic"
 
-export default function handler(req: NextApiRequest, res: NextApiResponseServerSocket) {
-  if (res.socket.server.io) {
-    console.log("Socket is already running")
-  } else {
-    console.log("Socket is initializing")
-    const io = new Server(res.socket.server, {
-      path: "/api/socket/io",
-      addTrailingSlash: false,
-      cors: {
-        origin: process.env.NODE_ENV === "production" ? false : ["http://localhost:3000"],
-        methods: ["GET", "POST"]
-      }
-    })
+export async function GET(request: NextRequest) {
+  try {
+    const io = getSocketServer()
     
-    res.socket.server.io = io
+    if (!io) {
+      return NextResponse.json({ error: "Socket server not initialized" }, { status: 500 })
+    }
 
-    io.on("connection", (socket) => {
-      console.log("Client connected:", socket.id)
-
-      // Join user to their personal room
-      socket.on("join-user", (userId) => {
-        socket.join(`user-${userId}`)
-        console.log(`User ${userId} joined room user-${userId}`)
-      })
-
-      // Handle private messages
-      socket.on("send-message", (data) => {
-        const { senderId, receiverId, content } = data
-        
-        // Emit to receiver
-        io.to(`user-${receiverId}`).emit("new-message", {
-          senderId,
-          receiverId,
-          content,
-          timestamp: new Date().toISOString()
-        })
-        
-        // Emit back to sender for confirmation
-        io.to(`user-${senderId}`).emit("message-sent", {
-          senderId,
-          receiverId,
-          content,
-          timestamp: new Date().toISOString()
-        })
-      })
-
-      // Handle typing indicators
-      socket.on("typing", (data) => {
-        const { senderId, receiverId } = data
-        io.to(`user-${receiverId}`).emit("user-typing", { senderId })
-      })
-
-      socket.on("stop-typing", (data) => {
-        const { senderId, receiverId } = data
-        io.to(`user-${receiverId}`).emit("user-stopped-typing", { senderId })
-      })
-
-      // Handle read receipts
-      socket.on("mark-read", (data) => {
-        const { messageId, readerId } = data
-        io.to(`user-${readerId}`).emit("message-read", { messageId })
-      })
-
-      socket.on("disconnect", () => {
-        console.log("Client disconnected:", socket.id)
-      })
+    return NextResponse.json({ 
+      status: "Socket server is running",
+      path: "/api/socket/io"
     })
+  } catch (error) {
+    console.error("Error checking socket server:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
-
-  res.end()
 }
