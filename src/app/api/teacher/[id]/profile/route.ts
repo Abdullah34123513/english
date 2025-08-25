@@ -60,6 +60,7 @@ export async function GET(
     // Format the response to match the expected interface
     const formattedTeacher = {
       id: teacher.id,
+      userId: teacher.userId, // Add the user ID for messaging
       name: teacher.user.name,
       email: teacher.user.email,
       image: teacher.user.image,

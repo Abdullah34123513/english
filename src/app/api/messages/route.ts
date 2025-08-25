@@ -119,12 +119,65 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify that receiver exists
+    console.log('Looking for receiver with ID:', receiverId);
     const receiver = await db.user.findUnique({
       where: { id: receiverId }
     })
 
     if (!receiver) {
-      return NextResponse.json({ error: "Receiver not found", receiverId }, { status: 404 })
+      console.log('Receiver not found in database. Checking if it might be a teacher ID...');
+      
+      // Check if this is a teacher ID and get the associated user ID
+      const teacher = await db.teacher.findUnique({
+        where: { id: receiverId },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true
+            }
+          }
+        }
+      });
+      
+      if (teacher) {
+        console.log('Found teacher profile, using associated user ID:', teacher.user.id);
+        // Use the teacher's user ID instead
+        const message = await db.message.create({
+          data: {
+            senderId: session.user.id,
+            receiverId: teacher.user.id, // Use the actual user ID
+            content
+          },
+          include: {
+            sender: {
+              select: {
+                id: true,
+                name: true,
+                image: true
+              }
+            },
+            receiver: {
+              select: {
+                id: true,
+                name: true,
+                image: true
+              }
+            }
+          }
+        });
+
+        console.log('POST /api/messages - Message created successfully via teacher lookup:', { messageId: message.id, receiverId: teacher.user.id });
+        return NextResponse.json(message);
+      } else {
+        console.log('No teacher profile found either for ID:', receiverId);
+        return NextResponse.json({ 
+          error: "Receiver not found", 
+          receiverId,
+          note: "The provided ID does not correspond to a user or teacher profile"
+        }, { status: 404 });
+      }
     }
 
     const message = await db.message.create({

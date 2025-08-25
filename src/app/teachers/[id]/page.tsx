@@ -1187,7 +1187,7 @@ export default function TeacherProfilePage({ params }: { params: Promise<{ id: s
             role: session.user.role
           }}
           otherUser={{
-            id: teacher.id,
+            id: teacher.userId || teacher.id, // Use userId for messaging, fallback to id
             name: teacher.name,
             image: teacher.image,
             role: "TEACHER"

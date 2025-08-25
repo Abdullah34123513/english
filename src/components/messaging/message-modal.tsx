@@ -172,15 +172,22 @@ export function MessageModal({ isOpen, onClose, currentUser, otherUser }: Messag
         throw new Error('Invalid user IDs for fetching messages');
       }
 
+      console.log('Fetching messages between:', { 
+        currentUser: { id: currentUser.id, name: currentUser.name },
+        otherUser: { id: otherUser.id, name: otherUser.name }
+      })
+
       const response = await fetch(`/api/messages?userId=${currentUser.id}&otherUserId=${otherUser.id}`)
       if (response.ok) {
         const data = await response.json()
+        console.log('Fetched messages:', { count: data.length })
         setMessages(data)
         
         // Mark messages as read
         await markMessagesAsRead()
       } else {
         const error = await response.json()
+        console.error('Error fetching messages:', error)
         throw new Error(error.error || "Failed to load messages")
       }
     } catch (error) {
@@ -218,6 +225,13 @@ export function MessageModal({ isOpen, onClose, currentUser, otherUser }: Messag
       }
 
       // Save to database via API
+      console.log('Sending message to:', { 
+        receiverId: otherUser.id, 
+        receiverName: otherUser.name,
+        senderId: currentUser.id,
+        content: newMessage.trim() 
+      })
+      
       const response = await fetch("/api/messages", {
         method: "POST",
         headers: {
@@ -231,6 +245,7 @@ export function MessageModal({ isOpen, onClose, currentUser, otherUser }: Messag
 
       if (response.ok) {
         const message = await response.json()
+        console.log('Message sent successfully:', message)
         setMessages(prev => [...prev, message])
         setNewMessage("")
         
@@ -244,6 +259,7 @@ export function MessageModal({ isOpen, onClose, currentUser, otherUser }: Messag
         }
       } else {
         const error = await response.json()
+        console.error('API Error Response:', error)
         throw new Error(error.error || "Failed to send message")
       }
     } catch (error) {
