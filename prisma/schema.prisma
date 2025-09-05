@@ -295,6 +295,27 @@ model Message {
   @@index([createdAt])
 }
 
+model PaymentConfiguration {
+  id                  String   @id @default(cuid())
+  bankName            String
+  accountNumber       String
+  iban                String?
+  accountHolder       String
+  branch              String?
+  logo                String?
+  rating              Float?
+  features            String?  // JSON array of features
+  processingTime      String?  // Processing time description
+  isActive            Boolean  @default(true)
+  displayOrder        Int      @default(0)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@map("payment_configurations")
+  @@index([isActive])
+  @@index([displayOrder])
+}
+
 model Notification {
   id        String   @id @default(cuid())
   type      String   // BOOKING_CREATED, BOOKING_CONFIRMED, etc.

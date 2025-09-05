@@ -125,42 +125,6 @@ interface AnimationState {
   animationType: 'success' | 'error' | 'loading' | null
 }
 
-const BANK_ACCOUNTS: BankAccount[] = [
-  {
-    name: "Al Rajhi Bank",
-    accountNumber: "SA1234567890123456789012",
-    iban: "SA52ALRAHI0000123456789012",
-    accountHolder: "English Learning Platform",
-    branch: "Riyadh Main Branch",
-    logo: "🏦",
-    rating: 4.8,
-    features: ["24/7 Processing", "Instant Confirmation", "Mobile App"],
-    processingTime: "5-10 minutes"
-  },
-  {
-    name: "Saudi National Bank (SNB)",
-    accountNumber: "SA9876543210987654321098",
-    iban: "SA23SNBKHO0000987654321098",
-    accountHolder: "English Learning Platform",
-    branch: "Jeddah Commercial Branch",
-    logo: "🏛️",
-    rating: 4.6,
-    features: ["Fast Processing", "Online Banking", "Customer Support"],
-    processingTime: "10-15 minutes"
-  },
-  {
-    name: "Riyad Bank",
-    accountNumber: "SA5555666677778888999900",
-    iban: "SA34RIYAD0000555566667778888",
-    accountHolder: "English Learning Platform",
-    branch: "Dammam Industrial Branch",
-    logo: "🏢",
-    rating: 4.5,
-    features: ["Quick Transfer", "Digital Services", "Multi-currency"],
-    processingTime: "15-20 minutes"
-  }
-]
-
 const FAQ_ITEMS = [
   {
     question: "How long does payment verification take?",
@@ -211,9 +175,59 @@ export function BookingConfirmationPopup({
   const [showBankComparison, setShowBankComparison] = useState(false)
   const [dragActive, setDragActive] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
+  const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([])
+  const [bankAccountsLoading, setBankAccountsLoading] = useState(true)
   
   const fileInputRef = useRef<HTMLInputElement>(null)
   const dropAreaRef = useRef<HTMLDivElement>(null)
+
+  // Fetch payment configurations
+  useEffect(() => {
+    const fetchPaymentConfigurations = async () => {
+      try {
+        const response = await fetch("/api/payment-configurations/active")
+        if (response.ok) {
+          const data = await response.json()
+          setBankAccounts(data)
+        } else {
+          // Fallback to default bank accounts if API fails
+          setBankAccounts([
+            {
+              name: "Default Bank",
+              accountNumber: "SA1234567890123456789012",
+              iban: "SA52ALRAHI0000123456789012",
+              accountHolder: "English Learning Platform",
+              branch: "Main Branch",
+              logo: "🏦",
+              rating: 4.5,
+              features: ["24/7 Processing", "Secure Transfer"],
+              processingTime: "5-10 minutes"
+            }
+          ])
+        }
+      } catch (error) {
+        console.error("Error fetching payment configurations:", error)
+        // Fallback to default bank accounts
+        setBankAccounts([
+          {
+            name: "Default Bank",
+            accountNumber: "SA1234567890123456789012",
+            iban: "SA52ALRAHI0000123456789012",
+            accountHolder: "English Learning Platform",
+            branch: "Main Branch",
+            logo: "🏦",
+            rating: 4.5,
+            features: ["24/7 Processing", "Secure Transfer"],
+            processingTime: "5-10 minutes"
+          }
+        ])
+      } finally {
+        setBankAccountsLoading(false)
+      }
+    }
+
+    fetchPaymentConfigurations()
+  }, [])
 
   // Real-time validation
   useEffect(() => {
@@ -886,34 +900,49 @@ export function BookingConfirmationPopup({
                           </tr>
                         </thead>
                         <tbody>
-                          {BANK_ACCOUNTS.map((bank, index) => (
-                            <tr key={index} className="border-b hover:bg-gray-50">
-                              <td className="p-2 font-medium">{bank.name}</td>
-                              <td className="p-2">
-                                <div className="flex items-center space-x-1">
-                                  {renderStars(bank.rating)}
-                                  <span className="text-xs">{bank.rating}</span>
-                                </div>
-                              </td>
-                              <td className="p-2">{bank.processingTime}</td>
-                              <td className="p-2">
-                                <div className="flex flex-wrap gap-1">
-                                  {bank.features?.slice(0, 2).map((feature, i) => (
-                                    <Badge key={i} variant="outline" className="text-xs">
-                                      {feature}
-                                    </Badge>
-                                  ))}
-                                </div>
+                          {bankAccountsLoading ? (
+                            <tr>
+                              <td colSpan={4} className="p-4 text-center">
+                                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                                <span className="text-gray-600">Loading banks...</span>
                               </td>
                             </tr>
-                          ))}
+                          ) : (
+                            bankAccounts.map((bank, index) => (
+                              <tr key={index} className="border-b hover:bg-gray-50">
+                                <td className="p-2 font-medium">{bank.name}</td>
+                                <td className="p-2">
+                                  <div className="flex items-center space-x-1">
+                                    {renderStars(bank.rating)}
+                                    <span className="text-xs">{bank.rating}</span>
+                                  </div>
+                                </td>
+                                <td className="p-2">{bank.processingTime}</td>
+                                <td className="p-2">
+                                  <div className="flex flex-wrap gap-1">
+                                    {bank.features?.slice(0, 2).map((feature, i) => (
+                                      <Badge key={i} variant="outline" className="text-xs">
+                                        {feature}
+                                      </Badge>
+                                    ))}
+                                  </div>
+                              </td>
+                            </tr>
+                          ))
+                        )}
                         </tbody>
                       </table>
                     </div>
                   )}
 
                   <div className="space-y-3 sm:space-y-4">
-                    {BANK_ACCOUNTS.map((bank, index) => (
+                    {bankAccountsLoading ? (
+                      <div className="flex items-center justify-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                        <span className="ml-3 text-gray-600">Loading payment options...</span>
+                      </div>
+                    ) : (
+                      bankAccounts.map((bank, index) => (
                       <Card 
                         key={index} 
                         className={`border-0 bg-white shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-[1.02] ${
@@ -1052,7 +1081,7 @@ export function BookingConfirmationPopup({
                           )}
                         </CardContent>
                       </Card>
-                    ))}
+                    )))}
                   </div>
 
                   {/* Interactive Payment Instructions */}
@@ -1269,11 +1298,15 @@ export function BookingConfirmationPopup({
                           required
                         >
                           <option value="">Select your bank</option>
-                          {BANK_ACCOUNTS.map(bank => (
-                            <option key={bank.name} value={bank.name}>
-                              {bank.name} ({bank.rating}⭐)
-                            </option>
-                          ))}
+                          {bankAccountsLoading ? (
+                            <option value="">Loading banks...</option>
+                          ) : (
+                            bankAccounts.map(bank => (
+                              <option key={bank.name} value={bank.name}>
+                                {bank.name} ({bank.rating}⭐)
+                              </option>
+                            ))
+                          )}
                           <option value="Other">Other Bank</option>
                         </select>
                         {formErrors.bankName && (
