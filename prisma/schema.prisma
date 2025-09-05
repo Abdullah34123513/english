@@ -13,12 +13,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Add seed script configuration
-seed {
-  executor = "tsx"
-  script   = "prisma/seed.ts"
-}
-
 enum UserRole {
   STUDENT
   TEACHER
@@ -65,6 +59,7 @@ model User {
   passwordResets     PasswordReset[]
   sentMessages       Message[] @relation("SentMessages")
   receivedMessages   Message[] @relation("ReceivedMessages")
+  notifications      Notification[]
   
   @@map("users")
   @@index([email])
@@ -297,5 +292,26 @@ model Message {
   @@map("messages")
   @@index([senderId])
   @@index([receiverId])
+  @@index([createdAt])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  type      String   // BOOKING_CREATED, BOOKING_CONFIRMED, etc.
+  title     String
+  message   String
+  userId    String
+  userType  UserRole // STUDENT, TEACHER, ADMIN
+  relatedId String? // booking ID, payment ID, etc.
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+  @@index([userId])
+  @@index([userType])
+  @@index([type])
   @@index([createdAt])
 }

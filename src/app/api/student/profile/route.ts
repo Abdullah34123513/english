@@ -97,7 +97,8 @@ export async function GET() {
                 }
               }
             },
-            review: true
+            review: true,
+            payments: true // Include payment information
           },
           orderBy: {
             startTime: "desc"

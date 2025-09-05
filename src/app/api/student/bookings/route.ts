@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { BookingStatus } from "@prisma/client"
+import { notificationSystem } from "@/lib/notification-system"
 
 export async function GET() {
   try {
@@ -39,7 +40,8 @@ export async function GET() {
             }
           }
         },
-        review: true
+        review: true,
+        payments: true // Include payment information
       },
       orderBy: {
         startTime: "desc"
@@ -178,6 +180,9 @@ export async function POST(request: NextRequest) {
     })
 
     console.log("Booking created successfully:", booking)
+
+    // Send notifications to student, teacher, and admins
+    await notificationSystem.notifyBookingCreated(booking.id, studentProfile.id, teacherId)
 
     return NextResponse.json(booking)
   } catch (error) {

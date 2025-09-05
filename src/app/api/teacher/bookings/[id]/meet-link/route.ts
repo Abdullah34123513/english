@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { BookingStatus, PaymentStatus } from "@prisma/client"
 import { GoogleMeetService } from "@/lib/google-meet"
+import { notificationSystem } from "@/lib/notification-system"
 
 export async function POST(
   request: NextRequest,
@@ -110,6 +111,9 @@ export async function POST(
       where: { id: params.id },
       data: { meetLink }
     })
+
+    // Send notifications to student and admins
+    await notificationSystem.notifyMeetLinkGenerated(params.id, booking.studentId, booking.teacherId, meetLink)
 
     return NextResponse.json({
       message: "Meet link generated successfully",

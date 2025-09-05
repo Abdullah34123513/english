@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { BookingStatus } from "@prisma/client"
+import { notificationSystem } from "@/lib/notification-system"
 
 export async function POST(
   request: NextRequest,
@@ -99,8 +100,8 @@ export async function POST(
       }
     })
 
-    // TODO: Send notification to student that teacher has accepted the booking
-    // This could be implemented with email notifications or real-time notifications
+    // Send notifications to student and admins
+    await notificationSystem.notifyBookingConfirmed(bookingId, booking.studentId, booking.teacherId)
 
     return NextResponse.json({
       message: "Booking accepted successfully",

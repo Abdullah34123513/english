@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Calendar, Clock, User, Video, Star, MessageCircle, X } from "lucide-react"
+import { Calendar, RefreshCw } from "lucide-react"
 import { ReviewDialog } from "./review-dialog"
+import { EnhancedBookingCard } from "./enhanced-booking-card"
 import { 
   formatDateTimeForDisplay, 
   formatDateForDisplay, 
@@ -19,32 +19,11 @@ interface BookingListProps {
   onUpdate: () => void
 }
 
-interface Booking {
-  id: string
-  startTime: string
-  endTime: string
-  status: string
-  meetLink?: string
-  teacher: {
-    bio?: string
-    hourlyRate: number
-    user: {
-      name: string
-      email: string
-      image?: string
-    }
-  }
-  review?: {
-    rating: number
-    comment?: string
-  }
-}
-
 export function BookingList({ studentData, onUpdate }: BookingListProps) {
-  const [bookings, setBookings] = useState<Booking[]>([])
+  const [bookings, setBookings] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
-  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null)
+  const [selectedBooking, setSelectedBooking] = useState<any>(null)
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false)
 
   useEffect(() => {
@@ -120,23 +99,6 @@ export function BookingList({ studentData, onUpdate }: BookingListProps) {
     }
   }
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "PENDING":
-        return <Badge variant="secondary">Pending</Badge>
-      case "CONFIRMED":
-        return <Badge variant="default">Confirmed</Badge>
-      case "CANCELLED":
-        return <Badge variant="destructive">Cancelled</Badge>
-      case "COMPLETED":
-        return <Badge variant="outline">Completed</Badge>
-      case "NO_SHOW":
-        return <Badge variant="destructive">No Show</Badge>
-      default:
-        return <Badge variant="secondary">{status}</Badge>
-    }
-  }
-
   const upcomingBookings = bookings.filter(booking => isUpcoming(booking.startTime))
   const pastBookings = bookings.filter(booking => !isUpcoming(booking.startTime))
 
@@ -167,81 +129,51 @@ export function BookingList({ studentData, onUpdate }: BookingListProps) {
       {/* Upcoming Bookings */}
       <Card>
         <CardHeader>
-          <CardTitle>Upcoming Classes</CardTitle>
-          <CardDescription>Your scheduled English classes</CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Upcoming Classes</CardTitle>
+              <CardDescription>Your scheduled English classes</CardDescription>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                {upcomingBookings.length} Upcoming
+              </Badge>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={fetchBookings}
+              >
+                <RefreshCw className="h-4 w-4 mr-1" />
+                Refresh
+              </Button>
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           {upcomingBookings.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <Calendar className="h-12 w-12 mx-auto mb-4" />
-              <p>No upcoming classes. Book your first class to get started!</p>
+            <div className="text-center py-12 text-muted-foreground">
+              <Calendar className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+              <p className="text-lg font-medium text-gray-500">No upcoming classes</p>
+              <p className="text-gray-400">Book your first class to get started!</p>
+              <Button 
+                className="mt-4" 
+                onClick={() => window.location.href = '/teachers'}
+              >
+                Browse Teachers
+              </Button>
             </div>
           ) : (
-            upcomingBookings.map((booking) => (
-              <Card key={booking.id} className="border">
-                <CardContent className="pt-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-3">
-                        <Avatar className="h-10 w-10">
-                          <AvatarImage src={booking.teacher.user.image} />
-                          <AvatarFallback>{booking.teacher.user.name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <h3 className="font-medium">{booking.teacher.user.name}</h3>
-                          <p className="text-sm text-muted-foreground">${booking.teacher.hourlyRate}/hr</p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-3">
-                        <div className="flex items-center">
-                          <Calendar className="h-4 w-4 mr-1" />
-                          {formatDateForDisplay(booking.startTime)}
-                        </div>
-                        <div className="flex items-center">
-                          <Clock className="h-4 w-4 mr-1" />
-                          {formatDateTimeForDisplay(booking.startTime)} - {formatDateTimeForDisplay(booking.endTime)}
-                        </div>
-                      </div>
-
-                      <div className="flex items-center space-x-2">
-                        {getStatusBadge(booking.status)}
-                        {booking.meetLink && (
-                          <Badge variant="outline">
-                            <Video className="h-3 w-3 mr-1" />
-                            Meet Link Ready
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center space-x-2">
-                      {booking.meetLink && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => window.open(booking.meetLink, "_blank")}
-                        >
-                          <Video className="h-4 w-4 mr-1" />
-                          Join Class
-                        </Button>
-                      )}
-                      
-                      {booking.status === "PENDING" || booking.status === "CONFIRMED" ? (
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleCancelBooking(booking.id)}
-                        >
-                          <X className="h-4 w-4 mr-1" />
-                          Cancel
-                        </Button>
-                      ) : null}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
+            <div className="space-y-4">
+              {upcomingBookings.map((booking) => (
+                <EnhancedBookingCard
+                  key={booking.id}
+                  booking={booking}
+                  onCancel={handleCancelBooking}
+                  onReview={handleSubmitReview}
+                  showActions={true}
+                />
+              ))}
+            </div>
           )}
         </CardContent>
       </Card>
@@ -249,76 +181,34 @@ export function BookingList({ studentData, onUpdate }: BookingListProps) {
       {/* Past Bookings */}
       <Card>
         <CardHeader>
-          <CardTitle>Class History</CardTitle>
-          <CardDescription>Your completed classes</CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Class History</CardTitle>
+              <CardDescription>Your completed classes</CardDescription>
+            </div>
+            <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+              {pastBookings.length} Completed
+            </Badge>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           {pastBookings.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <Calendar className="h-12 w-12 mx-auto mb-4" />
-              <p>No completed classes yet.</p>
+            <div className="text-center py-12 text-muted-foreground">
+              <Calendar className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+              <p className="text-lg font-medium text-gray-500">No completed classes yet</p>
+              <p className="text-gray-400">Complete your first class to see it here!</p>
             </div>
           ) : (
-            pastBookings.map((booking) => (
-              <Card key={booking.id} className="border">
-                <CardContent className="pt-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-3">
-                        <Avatar className="h-10 w-10">
-                          <AvatarImage src={booking.teacher.user.image} />
-                          <AvatarFallback>{booking.teacher.user.name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <h3 className="font-medium">{booking.teacher.user.name}</h3>
-                          <p className="text-sm text-muted-foreground">${booking.teacher.hourlyRate}/hr</p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-3">
-                        <div className="flex items-center">
-                          <Calendar className="h-4 w-4 mr-1" />
-                          {formatDateForDisplay(booking.startTime)}
-                        </div>
-                        <div className="flex items-center">
-                          <Clock className="h-4 w-4 mr-1" />
-                          {formatDateTimeForDisplay(booking.startTime)} - {formatDateTimeForDisplay(booking.endTime)}
-                        </div>
-                      </div>
-
-                      <div className="flex items-center space-x-2">
-                        {getStatusBadge(booking.status)}
-                        
-                        {booking.review ? (
-                          <Badge variant="outline">
-                            <Star className="h-3 w-3 mr-1" />
-                            Rated {booking.review.rating}/5
-                          </Badge>
-                        ) : booking.status === "COMPLETED" ? (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setSelectedBooking(booking)
-                              setReviewDialogOpen(true)
-                            }}
-                          >
-                            <MessageCircle className="h-4 w-4 mr-1" />
-                            Leave Review
-                          </Button>
-                        ) : null}
-                      </div>
-
-                      {booking.review?.comment && (
-                        <div className="mt-3 p-3 bg-gray-50 rounded-md">
-                          <p className="text-sm text-muted-foreground">{booking.review.comment}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
+            <div className="space-y-4">
+              {pastBookings.map((booking) => (
+                <EnhancedBookingCard
+                  key={booking.id}
+                  booking={booking}
+                  onReview={handleSubmitReview}
+                  showActions={false}
+                />
+              ))}
+            </div>
           )}
         </CardContent>
       </Card>

@@ -26,10 +26,10 @@ import {
   Star,
   Sparkles,
   ChevronDown,
-  Bell,
   Search
 } from "lucide-react"
 import Link from "next/link"
+import { NotificationBadge } from "@/components/ui/notification-badge"
 
 export function Navigation() {
   const { data: session, status } = useSession()
@@ -103,10 +103,7 @@ export function Navigation() {
             ) : session ? (
               <>
                 {/* Notification Bell */}
-                <Button variant="ghost" size="sm" className="relative h-10 w-10 rounded-lg hover:bg-gray-100">
-                  <Bell className="h-5 w-5 text-gray-600" />
-                  <div className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></div>
-                </Button>
+                <NotificationBadge />
 
                 {/* Search */}
                 <Button variant="ghost" size="sm" className="h-10 w-10 rounded-lg hover:bg-gray-100">
