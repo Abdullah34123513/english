@@ -221,15 +221,37 @@ export default function StudentProfile() {
   }
 
   const fetchStudentStats = async () => {
-    // Mock stats data - in a real app, this would come from an API
-    setStats({
-      totalBookings: 15,
-      completedLessons: 12,
-      totalReviews: 8,
-      averageRating: 4.7,
-      studyStreak: 23,
-      completionRate: 80
-    })
+    try {
+      const response = await fetch(`/api/student/profile`)
+      if (response.ok) {
+        const data = await response.json()
+        const stats = data.statistics || {}
+        
+        setStats({
+          totalBookings: stats.totalClasses || 0,
+          completedLessons: stats.totalClasses || 0,
+          totalReviews: data.reviews?.length || 0,
+          averageRating: data.reviews?.length > 0 
+            ? Number((data.reviews.reduce((sum: number, review: any) => sum + review.rating, 0) / data.reviews.length).toFixed(1))
+            : 0,
+          studyStreak: stats.learningStreak || 0,
+          completionRate: stats.totalClasses > 0 
+            ? Number(((stats.totalClasses / (data.bookings?.length || 1)) * 100).toFixed(1))
+            : 0
+        })
+      }
+    } catch (error) {
+      console.error("Error fetching student stats:", error)
+      // Set default values on error
+      setStats({
+        totalBookings: 0,
+        completedLessons: 0,
+        totalReviews: 0,
+        averageRating: 0,
+        studyStreak: 0,
+        completionRate: 0
+      })
+    }
   }
 
   const toggleLearningGoal = (goal: string) => {

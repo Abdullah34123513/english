@@ -71,48 +71,29 @@ export default function TeacherMessages() {
 
   const fetchConversations = async () => {
     try {
-      // Mock data - in real app, this would come from API
-      const mockConversations: Conversation[] = [
-        {
-          id: "1",
-          studentId: "1",
-          studentName: "Emma Wilson",
-          lastMessage: "Thank you for the great lesson today!",
-          lastMessageTime: "2 hours ago",
-          unreadCount: 1,
+      const response = await fetch("/api/conversations")
+      if (response.ok) {
+        const data = await response.json()
+        
+        // Transform the data to match the Conversation interface
+        const conversations = data.map((conv: any) => ({
+          id: conv.id,
+          studentId: conv.studentId,
+          studentName: conv.student?.user?.name || 'Unknown Student',
+          studentAvatar: conv.student?.user?.image,
+          lastMessage: conv.lastMessage?.content || 'No messages yet',
+          lastMessageTime: conv.lastMessage?.createdAt 
+            ? new Date(conv.lastMessage.createdAt).toLocaleDateString()
+            : 'Never',
+          unreadCount: conv.unreadCount || 0,
           isActive: false
-        },
-        {
-          id: "2",
-          studentId: "2",
-          studentName: "James Chen",
-          lastMessage: "Can we reschedule tomorrow's class?",
-          lastMessageTime: "5 hours ago",
-          unreadCount: 0,
-          isActive: false
-        },
-        {
-          id: "3",
-          studentId: "3",
-          studentName: "Maria Garcia",
-          lastMessage: "I'm ready for the IELTS practice test",
-          lastMessageTime: "1 day ago",
-          unreadCount: 0,
-          isActive: false
-        },
-        {
-          id: "4",
-          studentId: "4",
-          studentName: "David Kim",
-          lastMessage: "The business English materials are very helpful",
-          lastMessageTime: "2 days ago",
-          unreadCount: 2,
-          isActive: false
-        }
-      ]
-      setConversations(mockConversations)
+        }))
+        
+        setConversations(conversations)
+      }
     } catch (error) {
       console.error("Error fetching conversations:", error)
+      setConversations([])
     } finally {
       setLoading(false)
     }
@@ -120,48 +101,29 @@ export default function TeacherMessages() {
 
   const fetchMessages = async (conversationId: string) => {
     try {
-      // Mock data - in real app, this would come from API
-      const mockMessages: Message[] = [
-        {
-          id: "1",
-          studentId: "1",
-          studentName: "Emma Wilson",
-          content: "Hi! I'm looking forward to our lesson today",
-          timestamp: "10:30 AM",
-          isRead: true,
-          isFromTeacher: false
-        },
-        {
-          id: "2",
-          studentId: "1",
-          studentName: "Emma Wilson",
-          content: "Hello Emma! I'm ready when you are. We'll focus on business vocabulary today.",
-          timestamp: "10:32 AM",
-          isRead: true,
-          isFromTeacher: true
-        },
-        {
-          id: "3",
-          studentId: "1",
-          studentName: "Emma Wilson",
-          content: "Perfect! I've prepared some questions about my work presentation.",
-          timestamp: "10:35 AM",
-          isRead: true,
-          isFromTeacher: false
-        },
-        {
-          id: "4",
-          studentId: "1",
-          studentName: "Emma Wilson",
-          content: "Thank you for the great lesson today!",
-          timestamp: "11:45 AM",
-          isRead: false,
-          isFromTeacher: false
-        }
-      ]
-      setMessages(mockMessages)
+      const response = await fetch(`/api/messages?conversationId=${conversationId}`)
+      if (response.ok) {
+        const data = await response.json()
+        
+        // Transform the data to match the Message interface
+        const messages = data.map((msg: any) => ({
+          id: msg.id,
+          studentId: msg.senderId === session?.user?.id ? msg.receiverId : msg.senderId,
+          studentName: msg.senderId === session?.user?.id 
+            ? activeConversation?.studentName || 'Student'
+            : 'You',
+          studentAvatar: msg.sender?.image,
+          content: msg.content,
+          timestamp: new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          isRead: msg.isRead,
+          isFromTeacher: msg.senderId === session?.user?.id
+        }))
+        
+        setMessages(messages)
+      }
     } catch (error) {
       console.error("Error fetching messages:", error)
+      setMessages([])
     }
   }
 

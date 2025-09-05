@@ -176,34 +176,88 @@ export default function ProfilePage() {
   }
 
   const fetchRecentActivity = async () => {
-    // Mock recent activity data - in a real app, this would come from an API
-    const mockActivity: ActivityItem[] = [
-      {
-        id: "1",
-        type: "booking",
-        title: "New Lesson Booked",
-        description: "English conversation practice with Sarah Johnson",
-        date: "2 hours ago",
-        icon: BookMarked
-      },
-      {
-        id: "2",
-        type: "review",
-        title: "Review Submitted",
-        description: "Rated 5 stars for Michael Chen's lesson",
-        date: "1 day ago",
-        icon: Star
-      },
-      {
-        id: "3",
-        type: "payment",
-        title: "Payment Confirmed",
-        description: "Monthly subscription payment processed",
-        date: "3 days ago",
-        icon: CheckCircle
+    try {
+      let activities: ActivityItem[] = []
+      
+      if (session?.user?.role === "STUDENT") {
+        // Fetch student bookings and reviews
+        const [profileResponse, bookingsResponse] = await Promise.all([
+          fetch("/api/student/profile"),
+          fetch("/api/student/bookings")
+        ])
+        
+        if (profileResponse.ok && bookingsResponse.ok) {
+          const profileData = await profileResponse.json()
+          const bookingsData = await bookingsResponse.json()
+          
+          // Process bookings as activity
+          bookingsData.forEach((booking: any) => {
+            activities.push({
+              id: booking.id,
+              type: 'booking',
+              title: 'Lesson Booked',
+              description: `${booking.subject || 'English lesson'} with ${booking.teacher?.user?.name || 'teacher'}`,
+              date: new Date(booking.createdAt).toLocaleDateString(),
+              icon: BookMarked
+            })
+          })
+          
+          // Process reviews as activity
+          profileData.reviews?.forEach((review: any) => {
+            activities.push({
+              id: review.id,
+              type: 'review',
+              title: 'Review Submitted',
+              description: `Rated ${review.rating} stars for ${review.teacher?.user?.name || 'teacher'}`,
+              date: new Date(review.createdAt).toLocaleDateString(),
+              icon: Star
+            })
+          })
+        }
+      } else if (session?.user?.role === "TEACHER") {
+        // Fetch teacher profile and bookings
+        const [profileResponse, bookingsResponse] = await Promise.all([
+          fetch("/api/teacher/profile"),
+          fetch("/api/teacher/bookings")
+        ])
+        
+        if (profileResponse.ok && bookingsResponse.ok) {
+          const profileData = await profileResponse.json()
+          const bookingsData = await bookingsResponse.json()
+          
+          // Process bookings as activity
+          bookingsData.forEach((booking: any) => {
+            activities.push({
+              id: booking.id,
+              type: 'booking',
+              title: 'Lesson Scheduled',
+              description: `${booking.subject || 'English lesson'} with ${booking.student?.user?.name || 'student'}`,
+              date: new Date(booking.createdAt).toLocaleDateString(),
+              icon: BookMarked
+            })
+          })
+          
+          // Process reviews as activity
+          profileData.reviews?.forEach((review: any) => {
+            activities.push({
+              id: review.id,
+              type: 'review',
+              title: 'New Review Received',
+              description: `Rated ${review.rating} stars from ${review.student?.user?.name || 'student'}`,
+              date: new Date(review.createdAt).toLocaleDateString(),
+              icon: Star
+            })
+          })
+        }
       }
-    ]
-    setRecentActivity(mockActivity)
+      
+      // Sort activities by date (newest first) and take last 10
+      activities.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      setRecentActivity(activities.slice(0, 10))
+    } catch (error) {
+      console.error("Error fetching recent activity:", error)
+      setRecentActivity([])
+    }
   }
 
   const getInterestIcon = (interest: string) => {

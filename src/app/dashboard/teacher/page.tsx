@@ -124,18 +124,71 @@ export default function TeacherDashboard() {
 
   const fetchDashboardStats = async () => {
     try {
-      // Mock data - in real app, this would come from API
-      setStats({
-        totalBookings: 156,
-        upcomingClasses: 8,
-        monthlyEarnings: 2840,
-        averageRating: 4.8,
-        totalStudents: 42,
-        completionRate: 94,
-        responseRate: 98,
-        thisMonthBookings: 28,
-        lastMonthBookings: 24
-      })
+      const response = await fetch("/api/teacher/profile")
+      if (response.ok) {
+        const data = await response.json()
+        const bookings = data.bookings || []
+        const reviews = data.reviews || []
+        
+        // Calculate statistics from real data
+        const totalBookings = bookings.length
+        const completedBookings = bookings.filter((b: any) => b.status === 'COMPLETED').length
+        const upcomingClasses = bookings.filter((b: any) => 
+          b.status === 'CONFIRMED' && new Date(b.startTime) > new Date()
+        ).length
+        
+        // Calculate monthly earnings from approved payments
+        const currentMonth = new Date().getMonth()
+        const currentYear = new Date().getFullYear()
+        const monthlyEarnings = bookings.reduce((total: number, booking: any) => {
+          const approvedPayment = booking.payments?.find((p: any) => p.status === 'APPROVED')
+          if (approvedPayment) {
+            const paymentDate = new Date(approvedPayment.paymentDate)
+            if (paymentDate.getMonth() === currentMonth && paymentDate.getFullYear() === currentYear) {
+              return total + approvedPayment.amount
+            }
+          }
+          return total
+        }, 0)
+        
+        // Calculate average rating
+        const averageRating = reviews.length > 0 
+          ? Number((reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / reviews.length).toFixed(1))
+          : 0
+        
+        // Calculate completion rate
+        const completionRate = totalBookings > 0 
+          ? Number(((completedBookings / totalBookings) * 100).toFixed(1))
+          : 0
+        
+        // Get unique students
+        const uniqueStudents = new Set(bookings.map((b: any) => b.studentId)).size
+        
+        // Calculate this month vs last month bookings
+        const thisMonthBookings = bookings.filter((b: any) => {
+          const bookingDate = new Date(b.createdAt)
+          return bookingDate.getMonth() === currentMonth && bookingDate.getFullYear() === currentYear
+        }).length
+        
+        const lastMonthBookings = bookings.filter((b: any) => {
+          const bookingDate = new Date(b.createdAt)
+          const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1
+          const year = currentMonth === 0 ? currentYear - 1 : currentYear
+          return bookingDate.getMonth() === lastMonth && bookingDate.getFullYear() === year
+        }).length
+        
+        setStats({
+          totalBookings,
+          upcomingClasses,
+          monthlyEarnings,
+          averageRating,
+          totalStudents: uniqueStudents,
+          completionRate,
+          responseRate: 95, // Mock for now
+          thisMonthBookings,
+          lastMonthBookings
+        })
+      }
     } catch (error) {
       console.error("Error fetching dashboard stats:", error)
     }
@@ -143,33 +196,71 @@ export default function TeacherDashboard() {
 
   const fetchRecentActivity = async () => {
     try {
-      // Mock data - in real app, this would come from API
-      setRecentActivity([
-        {
-          id: "1",
-          type: "booking",
-          title: "New Booking Confirmed",
-          description: "Sarah Johnson booked a Business English class",
-          time: "2 hours ago",
-          icon: Calendar
-        },
-        {
-          id: "2",
-          type: "review",
-          title: "New Review Received",
-          description: "Michael Chen left a 5-star review",
-          time: "5 hours ago",
-          icon: Star
-        },
-        {
-          id: "3",
-          type: "payment",
-          title: "Payment Processed",
-          description: "Received payment for 3 completed classes",
-          time: "1 day ago",
-          icon: DollarSign
-        }
-      ])
+      const response = await fetch("/api/teacher/bookings")
+      if (response.ok) {
+        const bookings = await response.json()
+        
+        // Transform recent bookings into activity
+        const activities = bookings.slice(0, 10).map((booking: any) => {
+          let activity: RecentActivity = {
+            id: booking.id,
+            type: 'booking' as const,
+            title: 'New Booking',
+            description: `${booking.student?.user?.name || 'Student'} booked a lesson`,
+            time: new Date(booking.createdAt).toLocaleDateString(),
+            icon: Calendar
+          }
+          
+          if (booking.status === 'COMPLETED') {
+            activity = {
+              id: booking.id,
+              type: 'booking' as const,
+              title: 'Lesson Completed',
+              description: `Completed lesson with ${booking.student?.user?.name || 'Student'}`,
+              time: new Date(booking.startTime).toLocaleDateString(),
+              icon: BookOpen
+            }
+          } else if (booking.status === 'CANCELLED') {
+            activity = {
+              id: booking.id,
+              type: 'cancellation' as const,
+              title: 'Booking Cancelled',
+              description: `Lesson with ${booking.student?.user?.name || 'Student'} was cancelled`,
+              time: new Date(booking.updatedAt).toLocaleDateString(),
+              icon: Activity
+            }
+          }
+          
+          // Check if there's a review for this booking
+          if (booking.review) {
+            activity = {
+              id: booking.review.id,
+              type: 'review' as const,
+              title: 'New Review Received',
+              description: `${booking.student?.user?.name || 'Student'} left a ${booking.review.rating}-star review`,
+              time: new Date(booking.review.createdAt).toLocaleDateString(),
+              icon: Star
+            }
+          }
+          
+          // Check if there's an approved payment
+          const approvedPayment = booking.payments?.find((p: any) => p.status === 'APPROVED')
+          if (approvedPayment) {
+            activity = {
+              id: approvedPayment.id,
+              type: 'payment' as const,
+              title: 'Payment Processed',
+              description: `Received payment for lesson with ${booking.student?.user?.name || 'Student'}`,
+              time: new Date(approvedPayment.approvedAt || approvedPayment.createdAt).toLocaleDateString(),
+              icon: DollarSign
+            }
+          }
+          
+          return activity
+        })
+        
+        setRecentActivity(activities)
+      }
     } catch (error) {
       console.error("Error fetching recent activity:", error)
     }
@@ -177,31 +268,34 @@ export default function TeacherDashboard() {
 
   const fetchUpcomingClasses = async () => {
     try {
-      // Mock data - in real app, this would come from API
-      setUpcomingClasses([
-        {
-          id: "1",
-          studentName: "Emma Wilson",
-          startTime: "2024-01-15T10:00:00",
-          endTime: "2024-01-15T11:00:00",
-          status: "CONFIRMED",
-          meetLink: "https://meet.google.com/abc-defg-hij"
-        },
-        {
-          id: "2",
-          studentName: "James Chen",
-          startTime: "2024-01-15T14:00:00",
-          endTime: "2024-01-15T15:00:00",
-          status: "PENDING"
-        },
-        {
-          id: "3",
-          studentName: "Maria Garcia",
-          startTime: "2024-01-16T09:00:00",
-          endTime: "2024-01-16T10:00:00",
-          status: "CONFIRMED"
-        }
-      ])
+      const response = await fetch("/api/teacher/bookings")
+      if (response.ok) {
+        const bookings = await response.json()
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+        const tomorrow = new Date(today)
+        tomorrow.setDate(tomorrow.getDate() + 1)
+        
+        // Get today's upcoming classes
+        const todaysClasses = bookings
+          .filter((booking: any) => {
+            const bookingDate = new Date(booking.startTime)
+            return bookingDate >= today && bookingDate < tomorrow && 
+                   ['CONFIRMED', 'PENDING'].includes(booking.status)
+          })
+          .map((booking: any) => ({
+            id: booking.id,
+            studentName: booking.student?.user?.name || 'Unknown Student',
+            studentAvatar: booking.student?.user?.image,
+            startTime: booking.startTime,
+            endTime: booking.endTime,
+            status: booking.status,
+            meetLink: booking.meetLink
+          }))
+          .sort((a: any, b: any) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
+        
+        setUpcomingClasses(todaysClasses)
+      }
     } catch (error) {
       console.error("Error fetching upcoming classes:", error)
     }
@@ -209,23 +303,48 @@ export default function TeacherDashboard() {
 
   const fetchNotifications = async () => {
     try {
-      // Mock data - in real app, this would come from API
-      setNotifications([
-        {
-          id: "1",
-          title: "Profile Completion Reminder",
-          message: "Complete your profile to increase visibility",
-          type: "info",
-          read: false
-        },
-        {
-          id: "2",
-          title: "New Student Inquiry",
-          message: "A student is interested in your IELTS preparation course",
-          type: "success",
-          read: false
+      const response = await fetch("/api/teacher/profile")
+      if (response.ok) {
+        const data = await response.json()
+        const notifications = []
+        
+        // Check if profile is incomplete
+        if (!data.bio || !data.education || !data.experience) {
+          notifications.push({
+            id: "1",
+            title: "Complete Your Profile",
+            message: "Add your bio, education, and experience to attract more students",
+            type: "info",
+            read: false
+          })
         }
-      ])
+        
+        // Check for upcoming bookings that need confirmation
+        const pendingBookings = data.bookings?.filter((b: any) => b.status === 'PENDING') || []
+        if (pendingBookings.length > 0) {
+          notifications.push({
+            id: "2",
+            title: "Pending Bookings",
+            message: `You have ${pendingBookings.length} booking(s) waiting for confirmation`,
+            type: "warning",
+            read: false
+          })
+        }
+        
+        // Check for recent reviews
+        const recentReviews = data.reviews?.slice(0, 3) || []
+        if (recentReviews.length > 0) {
+          notifications.push({
+            id: "3",
+            title: "New Reviews",
+            message: `You received ${recentReviews.length} new review(s) from students`,
+            type: "success",
+            read: false
+          })
+        }
+        
+        setNotifications(notifications)
+      }
     } catch (error) {
       console.error("Error fetching notifications:", error)
     }

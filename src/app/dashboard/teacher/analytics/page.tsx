@@ -59,53 +59,123 @@ export default function TeacherAnalytics() {
 
   const fetchAnalyticsData = async () => {
     try {
-      // Mock data - in real app, this would come from API
-      setAnalyticsData({
-        monthlyRevenue: [
-          { month: "Jan", revenue: 2200 },
-          { month: "Feb", revenue: 2800 },
-          { month: "Mar", revenue: 3200 },
-          { month: "Apr", revenue: 2900 },
-          { month: "May", revenue: 3500 },
-          { month: "Jun", revenue: 4100 }
-        ],
-        studentGrowth: [
-          { month: "Jan", students: 25 },
-          { month: "Feb", students: 32 },
-          { month: "Mar", students: 38 },
-          { month: "Apr", students: 42 },
-          { month: "May", students: 48 },
-          { month: "Jun", students: 55 }
-        ],
-        classCompletion: [
-          { subject: "Business English", completion: 95 },
-          { subject: "IELTS Preparation", completion: 88 },
-          { subject: "Conversation Practice", completion: 92 },
-          { subject: "Academic Writing", completion: 85 }
-        ],
-        ratingDistribution: [
-          { rating: 5, count: 28 },
-          { rating: 4, count: 12 },
-          { rating: 3, count: 2 },
-          { rating: 2, count: 0 },
-          { rating: 1, count: 0 }
-        ],
-        topSubjects: [
-          { subject: "Business English", bookings: 45 },
-          { subject: "IELTS Preparation", bookings: 38 },
-          { subject: "Conversation Practice", bookings: 32 },
-          { subject: "Academic Writing", bookings: 25 },
-          { subject: "Pronunciation", bookings: 16 }
-        ],
-        performanceMetrics: {
-          totalEarnings: 18700,
-          averageRating: 4.8,
-          totalStudents: 55,
-          completionRate: 90,
-          responseRate: 96,
-          classesTaught: 156
+      const response = await fetch("/api/teacher/profile")
+      if (response.ok) {
+        const data = await response.json()
+        const bookings = data.bookings || []
+        const reviews = data.reviews || []
+        
+        // Calculate monthly revenue
+        const monthlyRevenueData = []
+        const currentYear = new Date().getFullYear()
+        for (let month = 0; month < 6; month++) {
+          const monthDate = new Date(currentYear, month, 1)
+          const monthName = monthDate.toLocaleDateString('en-US', { month: 'short' })
+          
+          const revenue = bookings.reduce((total: number, booking: any) => {
+            const approvedPayment = booking.payments?.find((p: any) => p.status === 'APPROVED')
+            if (approvedPayment) {
+              const paymentDate = new Date(approvedPayment.paymentDate || approvedPayment.createdAt)
+              if (paymentDate.getMonth() === month && paymentDate.getFullYear() === currentYear) {
+                return total + approvedPayment.amount
+              }
+            }
+            return total
+          }, 0)
+          
+          monthlyRevenueData.push({ month: monthName, revenue })
         }
-      })
+        
+        // Calculate student growth
+        const studentGrowthData = []
+        const uniqueStudentsPerMonth = new Map()
+        
+        bookings.forEach((booking: any) => {
+          const bookingDate = new Date(booking.createdAt)
+          const monthKey = `${bookingDate.getFullYear()}-${bookingDate.getMonth()}`
+          
+          if (!uniqueStudentsPerMonth.has(monthKey)) {
+            uniqueStudentsPerMonth.set(monthKey, new Set())
+          }
+          uniqueStudentsPerMonth.get(monthKey)?.add(booking.studentId)
+        })
+        
+        for (let month = 0; month < 6; month++) {
+          const monthDate = new Date(currentYear, month, 1)
+          const monthName = monthDate.toLocaleDateString('en-US', { month: 'short' })
+          const monthKey = `${currentYear}-${month}`
+          
+          const students = uniqueStudentsPerMonth.get(monthKey)?.size || 0
+          studentGrowthData.push({ month: monthName, students })
+        }
+        
+        // Calculate rating distribution
+        const ratingCounts = [0, 0, 0, 0, 0] // 1-5 stars
+        reviews.forEach((review: any) => {
+          if (review.rating >= 1 && review.rating <= 5) {
+            ratingCounts[review.rating - 1]++
+          }
+        })
+        
+        const ratingDistribution = [
+          { rating: 5, count: ratingCounts[4] },
+          { rating: 4, count: ratingCounts[3] },
+          { rating: 3, count: ratingCounts[2] },
+          { rating: 2, count: ratingCounts[1] },
+          { rating: 1, count: ratingCounts[0] }
+        ]
+        
+        // Calculate performance metrics
+        const totalEarnings = bookings.reduce((total: number, booking: any) => {
+          const approvedPayment = booking.payments?.find((p: any) => p.status === 'APPROVED')
+          return total + (approvedPayment?.amount || 0)
+        }, 0)
+        
+        const averageRating = reviews.length > 0 
+          ? Number((reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / reviews.length).toFixed(1))
+          : 0
+        
+        const uniqueStudents = new Set(bookings.map((b: any) => b.studentId)).size
+        const completedBookings = bookings.filter((b: any) => b.status === 'COMPLETED').length
+        const completionRate = bookings.length > 0 
+          ? Number(((completedBookings / bookings.length) * 100).toFixed(1))
+          : 0
+        
+        const performanceMetrics = {
+          totalEarnings,
+          averageRating,
+          totalStudents: uniqueStudents,
+          completionRate,
+          responseRate: 95, // Mock for now
+          classesTaught: completedBookings
+        }
+        
+        // Mock class completion by subject (since we don't have subject data in bookings)
+        const classCompletion = [
+          { subject: "Business English", completion: Math.min(95, completionRate + 5) },
+          { subject: "IELTS Preparation", completion: Math.min(88, completionRate - 2) },
+          { subject: "Conversation Practice", completion: Math.min(92, completionRate + 2) },
+          { subject: "Academic Writing", completion: Math.min(85, completionRate - 5) }
+        ]
+        
+        // Mock top subjects (since we don't have subject data)
+        const topSubjects = [
+          { subject: "Business English", bookings: Math.floor(bookings.length * 0.3) },
+          { subject: "IELTS Preparation", bookings: Math.floor(bookings.length * 0.25) },
+          { subject: "Conversation Practice", bookings: Math.floor(bookings.length * 0.2) },
+          { subject: "Academic Writing", bookings: Math.floor(bookings.length * 0.15) },
+          { subject: "Pronunciation", bookings: Math.floor(bookings.length * 0.1) }
+        ]
+        
+        setAnalyticsData({
+          monthlyRevenue: monthlyRevenueData,
+          studentGrowth: studentGrowthData,
+          classCompletion,
+          ratingDistribution,
+          topSubjects,
+          performanceMetrics
+        })
+      }
     } catch (error) {
       console.error("Error fetching analytics data:", error)
     } finally {
