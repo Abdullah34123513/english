@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Calendar } from "@/components/ui/calendar"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { BookingConfirmationPopup } from "./booking-confirmation-popup"
+import { ModernPaymentPopup } from "./modern-payment-popup"
 import { MessageModal } from "@/components/messaging/message-modal"
 import { ValidationError, BookingError, handleUnknownError } from "@/lib/custom-error"
 import { createLogger } from "@/lib/logger"
@@ -86,6 +87,7 @@ export function EnhancedTeacherCard({ teacher, studentId, onBookClass, onSubmitP
   const [bookingSuccess, setBookingSuccess] = useState("")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [showPaymentPopup, setShowPaymentPopup] = useState(false)
+  const [showModernPaymentPopup, setShowModernPaymentPopup] = useState(false)
   const [pendingBooking, setPendingBooking] = useState<any>(null)
   const [isMessageModalOpen, setIsMessageModalOpen] = useState(false)
 
@@ -163,7 +165,7 @@ export function EnhancedTeacherCard({ teacher, studentId, onBookClass, onSubmitP
       }
 
       setPendingBooking(bookingData)
-      setShowPaymentPopup(true)
+      setShowModernPaymentPopup(true)
       setBookingSuccess("Booking created! Please complete the payment.")
     } catch (error) {
       const safeError = handleUnknownError(error)
@@ -276,7 +278,7 @@ export function EnhancedTeacherCard({ teacher, studentId, onBookClass, onSubmitP
         })
         
         // Close the payment popup but keep the dialog open so user can select a new time
-        setShowPaymentPopup(false)
+        setShowModernPaymentPopup(false)
         setBookingError("This time slot has just been booked by another student. Please select a different time slot.")
         setBookingSuccess("")
         
@@ -807,7 +809,29 @@ export function EnhancedTeacherCard({ teacher, studentId, onBookClass, onSubmitP
       </CardContent>
     </Card>
 
-    {/* Payment Confirmation Popup */}
+    {/* Modern Payment Popup */}
+    {showModernPaymentPopup && pendingBooking && (
+      <ModernPaymentPopup
+        isOpen={showModernPaymentPopup}
+        onClose={() => {
+          setShowModernPaymentPopup(false)
+          // Don't reset pendingBooking here - it will be reset after successful payment
+          // or if there's an error, the user can retry
+        }}
+        bookingData={pendingBooking}
+        userData={{
+          id: session?.user?.id || "",
+          name: session?.user?.name || "",
+          email: session?.user?.email || "",
+          image: session?.user?.image || "",
+          phone: "",
+          location: ""
+        }}
+        onConfirm={handlePaymentConfirmation}
+      />
+    )}
+
+    {/* Legacy Payment Confirmation Popup (Fallback) */}
     {showPaymentPopup && pendingBooking && (
       <BookingConfirmationPopup
         isOpen={showPaymentPopup}
@@ -817,6 +841,14 @@ export function EnhancedTeacherCard({ teacher, studentId, onBookClass, onSubmitP
           // or if there's an error, the user can retry
         }}
         bookingData={pendingBooking}
+        userData={{
+          id: session?.user?.id || "",
+          name: session?.user?.name || "",
+          email: session?.user?.email || "",
+          image: session?.user?.image || "",
+          phone: "",
+          location: ""
+        }}
         onConfirm={handlePaymentConfirmation}
       />
     )}
