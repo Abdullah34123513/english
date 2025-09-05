@@ -168,3 +168,15 @@ export function formatDuration(minutes: number): string {
   
   return `${hours} hr${hours > 1 ? 's' : ''} ${remainingMinutes} min`
 }
+
+/**
+ * Check if a date is within one hour from now
+ * @param dateString ISO date string
+ * @returns True if date is within one hour from now
+ */
+export function isWithinOneHour(dateString: string): boolean {
+  const date = new Date(dateString)
+  const now = new Date()
+  const oneHourFromNow = new Date(now.getTime() + 60 * 60 * 1000)
+  return date <= oneHourFromNow && date >= now
+}

@@ -503,3 +503,6 @@ The English Learning Platform Team
 // Export singleton instance
 export const emailService = new EmailService()
 export default emailService
+
+// Export the class for direct instantiation if needed
+export { EmailService }
