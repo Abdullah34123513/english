@@ -17,6 +17,7 @@ interface Booking {
   startTime: string
   endTime: string
   status: string
+  paymentStatus: string
   student: {
     user: {
       name: string
@@ -24,6 +25,10 @@ interface Booking {
     }
   }
   meetLink?: string
+  payments?: Array<{
+    status: string
+    amount: number
+  }>
 }
 
 export function BookingList({ teacherData, onUpdate }: BookingListProps) {
@@ -51,21 +56,40 @@ export function BookingList({ teacherData, onUpdate }: BookingListProps) {
     }
   }
 
-  const handleUpdateBookingStatus = async (bookingId: string, status: string) => {
+  const handleAcceptBooking = async (bookingId: string) => {
     try {
-      const response = await fetch(`/api/teacher/bookings/${bookingId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ status }),
+      const response = await fetch(`/api/teacher/bookings/${bookingId}/accept`, {
+        method: "POST",
       })
 
       if (response.ok) {
         fetchBookings()
         onUpdate()
       } else {
-        setError("Failed to update booking status")
+        const errorData = await response.json()
+        setError(errorData.error || "Failed to accept booking")
+      }
+    } catch (error) {
+      setError("An error occurred. Please try again.")
+    }
+  }
+
+  const handleRejectBooking = async (bookingId: string, reason: string = "") => {
+    try {
+      const response = await fetch(`/api/teacher/bookings/${bookingId}/reject`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ reason }),
+      })
+
+      if (response.ok) {
+        fetchBookings()
+        onUpdate()
+      } else {
+        const errorData = await response.json()
+        setError(errorData.error || "Failed to reject booking")
       }
     } catch (error) {
       setError("An error occurred. Please try again.")
@@ -81,10 +105,28 @@ export function BookingList({ teacherData, onUpdate }: BookingListProps) {
       if (response.ok) {
         fetchBookings()
       } else {
-        setError("Failed to generate Meet link")
+        const errorData = await response.json()
+        setError(errorData.error || "Failed to generate Meet link")
       }
     } catch (error) {
       setError("An error occurred. Please try again.")
+    }
+  }
+
+  const isPaymentApproved = (booking: Booking) => {
+    return booking.payments?.some(payment => payment.status === 'APPROVED')
+  }
+
+  const getPaymentStatus = (booking: Booking) => {
+    const approvedPayment = booking.payments?.find(payment => payment.status === 'APPROVED')
+    const pendingPayment = booking.payments?.find(payment => payment.status === 'PENDING')
+    
+    if (approvedPayment) {
+      return { status: 'APPROVED', color: 'bg-green-100 text-green-800' }
+    } else if (pendingPayment) {
+      return { status: 'PENDING', color: 'bg-yellow-100 text-yellow-800' }
+    } else {
+      return { status: 'NOT_PAID', color: 'bg-red-100 text-red-800' }
     }
   }
 
@@ -185,6 +227,9 @@ export function BookingList({ teacherData, onUpdate }: BookingListProps) {
 
                       <div className="flex items-center space-x-2 mb-4">
                         {getStatusBadge(booking.status)}
+                        <Badge className={getPaymentStatus(booking).color}>
+                          Payment: {getPaymentStatus(booking).status}
+                        </Badge>
                         {booking.meetLink && (
                           <Badge variant="outline">
                             <Video className="h-3 w-3 mr-1" />
@@ -199,7 +244,7 @@ export function BookingList({ teacherData, onUpdate }: BookingListProps) {
                         <>
                           <Button
                             size="sm"
-                            onClick={() => handleUpdateBookingStatus(booking.id, "CONFIRMED")}
+                            onClick={() => handleAcceptBooking(booking.id)}
                           >
                             <CheckCircle className="h-4 w-4 mr-1" />
                             Accept
@@ -207,7 +252,12 @@ export function BookingList({ teacherData, onUpdate }: BookingListProps) {
                           <Button
                             size="sm"
                             variant="destructive"
-                            onClick={() => handleUpdateBookingStatus(booking.id, "CANCELLED")}
+                            onClick={() => {
+                              const reason = prompt("Please provide a reason for rejecting this booking:")
+                              if (reason !== null) {
+                                handleRejectBooking(booking.id, reason)
+                              }
+                            }}
                           >
                             <XCircle className="h-4 w-4 mr-1" />
                             Decline
@@ -219,6 +269,8 @@ export function BookingList({ teacherData, onUpdate }: BookingListProps) {
                         <Button
                           size="sm"
                           onClick={() => generateMeetLink(booking.id)}
+                          disabled={!isPaymentApproved(booking)}
+                          title={!isPaymentApproved(booking) ? "Waiting for admin payment approval" : "Generate Google Meet link"}
                         >
                           <Video className="h-4 w-4 mr-1" />
                           Generate Meet Link

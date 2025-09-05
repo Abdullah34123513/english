@@ -37,6 +37,13 @@ export async function GET() {
               }
             }
           }
+        },
+        payments: {
+          select: {
+            status: true,
+            amount: true,
+            approvedAt: true
+          }
         }
       },
       orderBy: {

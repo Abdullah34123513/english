@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { db } from "@/lib/db"
+import { BookingStatus, PaymentStatus } from "@prisma/client"
 import { GoogleMeetService } from "@/lib/google-meet"
 
 export async function POST(
@@ -36,7 +37,8 @@ export async function POST(
           include: {
             user: true
           }
-        }
+        },
+        payments: true
       }
     })
 
@@ -46,6 +48,29 @@ export async function POST(
 
     if (booking.teacherId !== teacherProfile.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    // Check if booking is confirmed and payment is approved
+    if (booking.status !== BookingStatus.CONFIRMED) {
+      return NextResponse.json({ 
+        error: "Meet link can only be generated for confirmed bookings" 
+      }, { status: 400 })
+    }
+
+    // Check if payment has been approved
+    const approvedPayment = booking.payments?.find(payment => payment.status === 'APPROVED')
+    if (!approvedPayment) {
+      return NextResponse.json({ 
+        error: "Meet link can only be generated after payment is approved by admin" 
+      }, { status: 400 })
+    }
+
+    // Check if meet link already exists
+    if (booking.meetLink) {
+      return NextResponse.json({ 
+        message: "Meet link already exists",
+        meetLink: booking.meetLink 
+      })
     }
 
     // Get teacher's Google access token
@@ -86,7 +111,11 @@ export async function POST(
       data: { meetLink }
     })
 
-    return NextResponse.json(updatedBooking)
+    return NextResponse.json({
+      message: "Meet link generated successfully",
+      booking: updatedBooking
+    })
+
   } catch (error) {
     console.error("Error generating Meet link:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
